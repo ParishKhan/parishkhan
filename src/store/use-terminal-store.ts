@@ -4,7 +4,7 @@ export interface TerminalLine {
   content: any;
   type: TerminalLineType;
   metadata?: {
-    richType?: 'tree' | 'table' | 'neofetch' | 'changelog';
+    richType?: 'tree' | 'table' | 'neofetch' | 'changelog' | 'matrix' | 'cowsay' | 'ps';
     animate?: boolean;
   };
 }
@@ -14,6 +14,9 @@ interface TerminalState {
   history: string[];
   historyIndex: number;
   validCommands: string[];
+  suggestions: string[];
+  suggestedFollowUp: string | null;
+  lastActivity: number;
 }
 interface TerminalActions {
   toggleTerminal: () => void;
@@ -22,32 +25,46 @@ interface TerminalActions {
   clearOutput: () => void;
   addToHistory: (command: string) => void;
   setHistoryIndex: (index: number) => void;
+  setSuggestions: (suggestions: string[]) => void;
+  setFollowUp: (followUp: string | null) => void;
+  updateActivity: () => void;
 }
 export const useTerminalStore = create<TerminalState & TerminalActions>((set) => ({
   isTerminalMode: false,
   validCommands: [
-    'about', 'skills', 'experience', 'projects', 'contact', 
-    'theme', 'clear', 'exit', 'whoami', 'neofetch', 
-    'help', 'ls', 'cat', 'cd', 'echo', 'history'
+    'about', 'skills', 'experience', 'projects', 'contact',
+    'theme', 'clear', 'exit', 'whoami', 'neofetch',
+    'help', 'ls', 'cat', 'cd', 'echo', 'history',
+    'matrix', 'cowsay', 'fortune', 'weather', 'ps', 'sudo'
   ],
   output: [
-    { content: "PARISH_OS [v2.1.0-STABLE]", type: 'system' },
-    { content: "SYSTEM_CHECK: 100% OK", type: 'system' },
-    { content: "INITIALIZING ENVIRONMENT...", type: 'system' },
-    { content: "Type 'help' to begin session.", type: 'system' },
+    { content: "PARISH_OS [v2.2.0-LTS]", type: 'system' },
+    { content: "SYSTEM_READY: ENCRYPTED_TUNNEL_ESTABLISHED", type: 'system' },
+    { content: "Type 'help' for available directives.", type: 'system' },
     { content: "------------------------------------------------", type: 'system' },
   ],
   history: [],
   historyIndex: -1,
-  toggleTerminal: () => set((state) => ({ isTerminalMode: !state.isTerminalMode })),
-  setTerminalMode: (mode) => set({ isTerminalMode: mode }),
+  suggestions: [],
+  suggestedFollowUp: null,
+  lastActivity: Date.now(),
+  toggleTerminal: () => set((state) => ({ 
+    isTerminalMode: !state.isTerminalMode,
+    lastActivity: Date.now()
+  })),
+  setTerminalMode: (mode) => set({ isTerminalMode: mode, lastActivity: Date.now() }),
   addOutput: (lines) => set((state) => ({
-    output: [...state.output, ...(Array.isArray(lines) ? lines : [lines])]
+    output: [...state.output, ...(Array.isArray(lines) ? lines : [lines])],
+    lastActivity: Date.now()
   })),
   clearOutput: () => set({ output: [] }),
   addToHistory: (command) => set((state) => ({
     history: [command, ...state.history].slice(0, 50),
-    historyIndex: -1
+    historyIndex: -1,
+    lastActivity: Date.now()
   })),
   setHistoryIndex: (index) => set({ historyIndex: index }),
+  setSuggestions: (suggestions) => set({ suggestions }),
+  setFollowUp: (suggestedFollowUp) => set({ suggestedFollowUp }),
+  updateActivity: () => set({ lastActivity: Date.now() }),
 }));

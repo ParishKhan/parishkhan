@@ -23,15 +23,15 @@ export function HomePage() {
     enableOnFormTags: true
   });
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-emerald-500/30 font-sans">
+    <div className="min-h-screen bg-background text-foreground selection:bg-emerald-500/30 font-sans overflow-x-hidden">
       <AnimatePresence mode="wait">
         {isTerminalMode && <ProgrammerTerminal />}
       </AnimatePresence>
       <div
         aria-hidden={isTerminalMode}
         className={cn(
-          "transition-opacity duration-300",
-          isTerminalMode ? "opacity-0 pointer-events-none" : "opacity-100"
+          "transition-all duration-500",
+          isTerminalMode ? "opacity-0 blur-xl pointer-events-none scale-95" : "opacity-100 blur-0 scale-100"
         )}
       >
         <ThemeToggle />
@@ -70,7 +70,7 @@ export function HomePage() {
                 Designed & Built by Parish Khan © {new Date().getFullYear()}
               </p>
               <div className="mt-2 text-[10px] font-mono text-emerald-500/50">
-                BUILD_SUCCESS: v1.1.0-stable
+                BUILD_SUCCESS: v2.2.0-stable_lts
               </div>
             </footer>
           </div>
