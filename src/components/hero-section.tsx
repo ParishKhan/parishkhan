@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Mail, Phone } from 'lucide-react';
 export function HeroSection() {
   return (
-    <section className="py-12 md:py-20 flex flex-col items-start gap-6 animate-fade-in">
+    <section id="about" className="py-12 md:py-20 flex flex-col items-start gap-6 animate-fade-in scroll-mt-24">
       <div className="space-y-4 max-w-2xl">
         <div className="inline-block px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-mono mb-2">
           available_for_hire: <span className="text-emerald-500">true</span>
@@ -18,9 +18,10 @@ export function HeroSection() {
           </h2>
         </div>
         <div className="font-mono text-emerald-500 text-lg md:text-xl flex items-center">
-          <span className="border-r-2 border-emerald-500 pr-2">
+          <span className="border-r-2 border-emerald-500 pr-2 inline-block">
             {RESUME_DATA.summary}
           </span>
+          <span className="w-2 h-6 bg-emerald-500 ml-1 animate-blink" />
         </div>
         <p className="text-muted-foreground max-w-[600px] text-base md:text-lg leading-relaxed">
           {RESUME_DATA.about}

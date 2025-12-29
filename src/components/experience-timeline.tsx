@@ -14,7 +14,13 @@ export function ExperienceTimeline() {
           <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border bg-card/50 backdrop-blur-sm hover:border-emerald-500/30 transition-all duration-300">
             <div className="flex items-center justify-between space-x-2 mb-1">
               <div className="font-bold text-foreground">
-                <a href={work.link} className="hover:underline">{work.company}</a>
+                {work.link && work.link !== '#' ? (
+                  <a href={work.link} className="hover:underline hover:text-emerald-500 transition-colors" target="_blank" rel="noopener noreferrer">
+                    {work.company}
+                  </a>
+                ) : (
+                  <span>{work.company}</span>
+                )}
               </div>
               <time className="font-mono text-xs text-emerald-500">
                 {work.start} - {work.end}
