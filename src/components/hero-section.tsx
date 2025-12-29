@@ -1,32 +1,26 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { RESUME_DATA } from '@/data/resume-data';
 import { Button } from '@/components/ui/button';
-import { Mail } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 export function HeroSection() {
   return (
-    <section className="py-12 md:py-20 flex flex-col items-start gap-6">
+    <section className="py-12 md:py-20 flex flex-col items-start gap-6 animate-fade-in">
       <div className="space-y-4 max-w-2xl">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-block px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-mono mb-2"
-        >
+        <div className="inline-block px-3 py-1 rounded-full bg-secondary text-secondary-foreground text-xs font-mono mb-2">
           available_for_hire: <span className="text-emerald-500">true</span>
-        </motion.div>
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">
-          {RESUME_DATA.name}
-        </h1>
-        <div className="font-mono text-muted-foreground text-lg md:text-xl flex items-center">
-          <motion.span
-            initial={{ width: 0 }}
-            animate={{ width: "auto" }}
-            transition={{ duration: 2, ease: "easeInOut" }}
-            className="overflow-hidden whitespace-nowrap border-r-2 border-emerald-500 pr-1"
-          >
-            {RESUME_DATA.summary.split('.')[0]}.
-          </motion.span>
+        </div>
+        <div className="space-y-1">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter text-foreground">
+            {RESUME_DATA.name}
+          </h1>
+          <h2 className="text-xl md:text-2xl text-muted-foreground font-medium">
+            {RESUME_DATA.formalName}
+          </h2>
+        </div>
+        <div className="font-mono text-emerald-500 text-lg md:text-xl flex items-center">
+          <span className="border-r-2 border-emerald-500 pr-2">
+            {RESUME_DATA.summary}
+          </span>
         </div>
         <p className="text-muted-foreground max-w-[600px] text-base md:text-lg leading-relaxed">
           {RESUME_DATA.about}
@@ -47,9 +41,20 @@ export function HeroSection() {
             </a>
           </Button>
         ))}
-        <Button 
-          variant="secondary" 
-          className="rounded-xl font-mono text-sm"
+        <Button
+          variant="outline"
+          size="icon"
+          asChild
+          className="rounded-xl hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-colors"
+        >
+          <a href={`tel:${RESUME_DATA.contact.phone}`}>
+            <Phone className="h-4 w-4" />
+            <span className="sr-only">Phone</span>
+          </a>
+        </Button>
+        <Button
+          variant="secondary"
+          className="rounded-xl font-mono text-sm border border-transparent hover:border-emerald-500/30 transition-all"
           onClick={() => window.location.href = `mailto:${RESUME_DATA.contact.email}`}
         >
           <Mail className="mr-2 h-4 w-4" />

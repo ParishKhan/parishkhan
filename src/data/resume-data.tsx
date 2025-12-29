@@ -1,16 +1,18 @@
-import { Github, Linkedin, Mail, Twitter, Globe, ExternalLink } from "lucide-react";
+import { Github, Linkedin, Mail, Twitter, Facebook, Phone, ExternalLink } from "lucide-react";
 export const RESUME_DATA = {
-  name: "Mezbibur 'Parish' Rahman",
-  initials: "PR",
-  location: "Israel, Artlist LTD",
-  locationLink: "https://www.google.com/maps/place/Israel",
+  name: "Parish Khan",
+  formalName: "Mezbibur Rahman Khan",
+  initials: "PK",
+  location: "Bogura, Bangladesh",
+  locationLink: "https://www.google.com/maps/place/Bogura",
   about:
     "Software Engineer focused on building high-performance web applications with a minimalist aesthetic and clean code architecture.",
   summary:
-    "I am a results-driven Full Stack Engineer with a passion for frontend excellence and robust testing strategies. Currently scaling creative platforms at Artlist LTD. I thrive in environments that value technical rigour, agile methodologies, and elegant user interfaces.",
+    "I am a results-driven Full Stack Engineer with a passion for frontend excellence and robust testing strategies. Currently scaling creative platforms at Artlist LTD.",
   avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=200&h=200",
   contact: {
-    email: "parish@example.com",
+    email: "parish@artlist.io",
+    phone: "+880 1737094776",
     social: [
       {
         name: "GitHub",
@@ -23,6 +25,11 @@ export const RESUME_DATA = {
         icon: Linkedin,
       },
       {
+        name: "Facebook",
+        url: "https://www.facebook.com/mezbibur/",
+        icon: Facebook,
+      },
+      {
         name: "Twitter",
         url: "https://twitter.com/parish",
         icon: Twitter,
@@ -30,9 +37,10 @@ export const RESUME_DATA = {
     ],
   },
   skills: {
-    frontend: ["React", "TypeScript", "Next.js", "Tailwind CSS", "Framer Motion", "Zustand"],
-    testing: ["Jest", "React Testing Library", "Cypress", "Playwright"],
-    tools: ["Git", "Docker", "Agile/Scrum", "CI/CD", "Vite"],
+    frontend: ["React", "TypeScript", "Next.js", "Tailwind CSS", "Angular", "NextUI", "Material UI", "Styled Components", "GraphQL"],
+    testing: ["Jest", "Storybook", "Unit Test", "Automation"],
+    tools: ["Clean Code", "Git", "Accessibility", "JIRA", "TDD", "CI/CD"],
+    ai: ["Prompt Engineering", "Vibe Coding", "LLMs", "AI Tools"],
   },
   work: [
     {
@@ -70,20 +78,20 @@ export const RESUME_DATA = {
     },
     {
       title: "Artgrid",
-      techStack: ["React", "Redux", "Node.js"],
-      description: "Stock footage platform with advanced search and discovery features.",
+      techStack: ["Angular 7", "TypeScript", "RxJS", "Sass", "Material UI"],
+      description: "A web app to buy licensed video. Cypress for unit test and REST for data fetching. Focused on performance and reliability.",
       link: {
         label: "artgrid.io",
         href: "https://artgrid.io",
       },
     },
     {
-      title: "E-Bill System",
-      techStack: ["React", "Express", "PostgreSQL"],
-      description: "Minimalist invoicing and billing automation for small businesses.",
+      title: "TutorialSearch",
+      techStack: ["React", "TypeScript", "NextJS"],
+      description: "Tutorial search platform for developers.",
       link: {
-        label: "github.com/ebill",
-        href: "#",
+        label: "tutorialsearch.io",
+        href: "https://tutorialsearch.io/",
       },
     },
   ],
