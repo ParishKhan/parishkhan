@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTerminalStore, TerminalLine } from '@/store/use-terminal-store';
+import { useTerminalStore } from '@/store/use-terminal-store';
 import { RESUME_DATA } from '@/data/resume-data';
 import { useTheme } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
@@ -38,11 +38,13 @@ export function ProgrammerTerminal() {
   const { toggleTheme } = useTheme();
   const [input, setInput] = useState('');
   const [isIdle, setIsIdle] = useState(false);
+  const [lastCommandError, setLastCommandError] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const sessionId = useRef(`SESSION_${Math.random().toString(36).substring(7).toUpperCase()}`);
   useEffect(() => {
     const timer = setInterval(() => {
-      if (Date.now() - lastActivity > 30000) setIsIdle(true);
+      if (Date.now() - lastActivity > 45000) setIsIdle(true);
       else setIsIdle(false);
     }, 1000);
     return () => clearInterval(timer);
@@ -67,9 +69,8 @@ export function ProgrammerTerminal() {
     playPing();
     updateActivity();
     addToHistory(cmd);
-    // Logic fix: Pass only the command string. 
-    // The renderer already adds 'parish@folio:~$ ' for type 'command'.
-    addOutput({ content: trimmed, type: 'command' } as TerminalLine);
+    setLastCommandError(false);
+    addOutput({ content: trimmed, type: 'command' });
     const parts = trimmed.split(' ');
     const baseCmd = parts[0].toLowerCase();
     const args = parts.slice(1);
@@ -80,74 +81,69 @@ export function ProgrammerTerminal() {
           { content: '  whoami, neofetch, skills, projects, experience, contact', type: 'response' },
           { content: '  ls [skills|projects], cat [exp.log|resume.txt], ps', type: 'response' },
           { content: '  matrix, cowsay [text], fortune, weather, theme, clear, exit', type: 'response' },
-        ] as TerminalLine[]);
+        ]);
         setFollowUp('neofetch');
         break;
       case 'whoami':
-        addOutput({ content: `${RESUME_DATA.formalName} — ${RESUME_DATA.summary}\nFull-stack engineer, vibe-coder, and minimalist enthusiast.`, type: 'response' } as TerminalLine);
+        addOutput({ content: `${RESUME_DATA.formalName} — ${RESUME_DATA.summary}\nFull-stack engineer and UI enthusiast.`, type: 'response' });
         break;
       case 'neofetch':
-        addOutput({ content: {}, type: 'rich', metadata: { richType: 'neofetch' } } as TerminalLine);
+        addOutput({ content: {}, type: 'rich', metadata: { richType: 'neofetch' } });
         break;
       case 'skills':
-        addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } } as TerminalLine);
-        setFollowUp('ls projects');
+        addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } });
         break;
       case 'ls':
         if (args[0]?.toLowerCase() === 'skills') {
-          addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } } as TerminalLine);
+          addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } });
         } else if (args[0]?.toLowerCase() === 'projects') {
-          addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'table' } } as TerminalLine);
+          addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'table' } });
         } else {
-          addOutput({ content: 'usage: ls [skills|projects]', type: 'error' } as TerminalLine);
+          addOutput({ content: 'usage: ls [skills|projects]', type: 'error' });
+          setLastCommandError(true);
         }
         break;
       case 'projects':
       case 'ps':
-        addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'ps' } } as TerminalLine);
-        setFollowUp('cat exp.log');
+        addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'ps' } });
         break;
       case 'experience':
-        addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } } as TerminalLine);
+        addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } });
         break;
       case 'cat':
         if (args[0] === 'exp.log') {
-          addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } } as TerminalLine);
+          addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } });
         } else if (args[0] === 'resume.txt') {
-          addOutput({ content: RESUME_DATA.summary + "\n\n" + RESUME_DATA.about, type: 'response' } as TerminalLine);
+          addOutput({ content: `${RESUME_DATA.summary}\n\n${RESUME_DATA.about}`, type: 'response' });
         } else {
-          addOutput({ content: 'file not found. try "ls" to see available files.', type: 'error' } as TerminalLine);
+          addOutput({ content: 'file not found. try "ls" to see available files.', type: 'error' });
+          setLastCommandError(true);
         }
         break;
       case 'matrix':
-        addOutput({ content: {}, type: 'rich', metadata: { richType: 'matrix' } } as TerminalLine);
+        addOutput({ content: {}, type: 'rich', metadata: { richType: 'matrix' } });
         break;
       case 'cowsay':
-        addOutput({ content: args.length > 0 ? args.join(' ') : 'Mooo!', type: 'rich', metadata: { richType: 'cowsay' } } as TerminalLine);
+        addOutput({ content: args.length > 0 ? args.join(' ') : 'Mooo!', type: 'rich', metadata: { richType: 'cowsay' } });
         break;
       case 'fortune': {
-        // Fix: Wrapped in braces to resolve no-case-declarations ESLint error
         const quotes = [
           "Code is like humor. When you have to explain it, it’s bad.",
           "Simplicity is the soul of efficiency.",
-          "Vibe coding is the future.",
           "Minimalism is not subtraction for the sake of subtraction."
         ];
-        addOutput({ content: quotes[Math.floor(Math.random() * quotes.length)], type: 'response' } as TerminalLine);
+        addOutput({ content: quotes[Math.floor(Math.random() * quotes.length)], type: 'response' });
         break;
       }
       case 'weather':
-        addOutput({ content: `LOCATION: ${RESUME_DATA.location}\nSTATUS: VIBE_STORM_LEVEL_5\nTEMP: 22��C (IDEAL_FOR_CODING)`, type: 'response' } as TerminalLine);
-        break;
-      case 'sudo':
-        addOutput({ content: 'nice try. user is not in the sudoers file. this incident will be reported.', type: 'error' } as TerminalLine);
+        addOutput({ content: `LOCATION: ${RESUME_DATA.location}\nSTATUS: IDEAL_FOR_CODING\nTEMP: 22°C`, type: 'response' });
         break;
       case 'contact':
-        addOutput(RESUME_DATA.contact.social.map(s => ({ content: `${s.name.padEnd(10)}: ${s.url}`, type: 'response' })) as TerminalLine[]);
+        addOutput(RESUME_DATA.contact.social.map(s => ({ content: `${s.name.padEnd(12)}: ${s.url}`, type: 'response' })));
         break;
       case 'theme':
         toggleTheme();
-        addOutput({ content: 'THEME_UPDATE: SUCCESS', type: 'system' } as TerminalLine);
+        addOutput({ content: 'THEME_UPDATE: SUCCESS', type: 'system' });
         break;
       case 'clear':
         clearOutput();
@@ -156,10 +152,11 @@ export function ProgrammerTerminal() {
         toggleTerminal();
         break;
       default:
+        setLastCommandError(true);
         addOutput([
           { content: `zsh: command not found: ${parts[0]}`, type: 'error' },
-          { content: `Type 'help' to see valid directives.`, type: 'system' }
-        ] as TerminalLine[]);
+          { content: `Type 'help' for valid directives.`, type: 'system' }
+        ]);
     }
     setSuggestions([]);
   };
@@ -196,65 +193,91 @@ export function ProgrammerTerminal() {
   if (!isTerminalMode) return null;
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0, scale: 1.05 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
       onClick={() => inputRef.current?.focus()}
       className={cn(
-        "fixed inset-0 z-[1000] bg-[#000A13] text-emerald-400 font-mono flex flex-col p-4 md:p-8 overflow-hidden select-none transition-all duration-700",
-        isIdle && "animate-crt-flicker brightness-75"
+        "fixed inset-0 z-[1000] bg-[#000A13] text-emerald-400 font-mono flex flex-col overflow-hidden select-none overscroll-none",
+        isIdle && "animate-crt-flicker brightness-75",
+        lastCommandError && "animate-terminal-glitch"
       )}
     >
       <div className="absolute inset-0 terminal-scanline pointer-events-none opacity-20" />
       <div className="absolute inset-0 crt-overlay pointer-events-none" />
-      <div className="relative z-10 flex flex-col h-full max-w-5xl mx-auto w-full">
-        <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar space-y-1 pb-4">
-          <pre className="text-[8px] md:text-xs leading-none mb-8 text-[#FBBF2F] animate-pulse">
+      {/* Terminal Header */}
+      <div className="relative z-20 flex items-center justify-between px-4 py-2 bg-emerald-950/20 border-b border-emerald-900/30 text-[10px] uppercase tracking-widest text-emerald-600/60 font-bold">
+        <div className="flex items-center gap-4">
+          <span>PARISH_OS v2.2.0</span>
+          <span className="hidden md:inline">NODE_READY</span>
+          <span className="text-emerald-500/40">{sessionId.current}</span>
+        </div>
+        <div className="flex gap-2">
+          <div className="w-2.5 h-2.5 rounded-full bg-red-500/20" />
+          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20" />
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/20" />
+        </div>
+      </div>
+      <div className="relative z-10 flex flex-col h-full max-w-5xl mx-auto w-full px-4 md:px-8">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar pt-6 pb-24 space-y-0.5">
+          <pre className="text-terminal-ascii leading-none mb-10 text-[#FBBF2F] neon-glow-amber opacity-90 overflow-x-auto pb-2">
 {`
  ██████   █████  ██████  ██ ███████ ██   ██     ██   ██ ██   ██  █████  ███    ██
  ██   ██ ██   ██ ██   ██ ██ ██      ██   ██     ██  ██  ██   ██ ██   ██ ████   ██
  ██████  ███████ ██████  ██ ███████ ███████     █████   ███████ ███████ ██ ██  ██
  ██      ██   ██ ██   ██ ██      ██ ██   ██     ██  ██  ██   ██ ██   ██ ██  ██ ██
  ██      ██   ██ ██   ██ ██ ███████ ██   ██     ██   ██ ██   ██ ██   ██ ██   ████
- PORTFOLIO_OS v2.2-STABLE // BUILD: 2024.Q4
 `}
           </pre>
-          <div aria-live="polite" className="space-y-1">
+          <div aria-live="polite" className="space-y-0.5">
             {output.map((line, i) => (
               <div key={i} className={cn(
-                "break-words whitespace-pre-wrap neon-glow-green",
-                line.type === 'command' && "text-[#FBBF2F] drop-shadow-[0_0_3px_rgba(251,191,47,0.4)]",
-                line.type === 'error' && "text-red-500 drop-shadow-none",
-                line.type === 'system' && "text-emerald-600 font-bold",
-                line.type === 'response' && "text-emerald-400"
+                "terminal-line break-words whitespace-pre-wrap transition-opacity duration-300",
+                line.type === 'command' ? "text-[#FBBF2F] neon-glow-amber text-terminal-prompt font-bold" : "text-terminal-output",
+                line.type === 'error' && "text-red-500 neon-glow-none border-red-900/20",
+                line.type === 'system' && "text-emerald-600/80 italic",
+                line.type === 'response' && "text-emerald-400/90"
               )}>
                 {line.type === 'rich' ? (
-                  <RichTerminalOutput
-                    type={line.metadata?.richType}
-                    data={line.content}
-                  />
+                  <RichTerminalOutput type={line.metadata?.richType} data={line.content} />
                 ) : (
-                  <span>{line.type === 'command' ? `parish@folio:~$ ` : ''}{line.content}</span>
+                  <span>
+                    {line.type === 'command' ? (
+                      <span className="mr-2 select-none opacity-70">parish@folio:~$</span>
+                    ) : null}
+                    {line.content}
+                  </span>
                 )}
               </div>
             ))}
           </div>
         </div>
-        <div className="relative mt-auto pt-4 border-t border-emerald-900/30">
-          <TerminalAutocomplete onSelect={setInput} />
-          <div className="flex items-center gap-2">
-            <span className="text-[#FBBF2F] font-bold shrink-0">parish@folio:~$</span>
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="flex-1 bg-transparent border-none outline-none text-emerald-400 caret-[#FBBF2F]"
-              spellCheck={false}
-              autoComplete="off"
-              autoFocus
-            />
+        {/* Input Bar */}
+        <div className="fixed bottom-0 left-0 right-0 bg-[#000A13]/90 backdrop-blur-md border-t border-emerald-900/30 p-4 md:p-6 z-30">
+          <div className="max-w-5xl mx-auto relative">
+            <TerminalAutocomplete onSelect={setInput} />
+            <div className="flex items-center gap-3">
+              <span className="text-[#FBBF2F] font-bold text-terminal-prompt neon-glow-amber shrink-0 select-none">
+                parish@folio:~$
+              </span>
+              <div className="relative flex-1 flex items-center">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full bg-transparent border-none outline-none text-emerald-400 caret-transparent text-terminal-prompt"
+                  spellCheck={false}
+                  autoComplete="off"
+                />
+                {/* Custom Cursor */}
+                <div 
+                  className="absolute pointer-events-none w-[3px] h-[1.4em] bg-[#FBBF2F] animate-blink neon-glow-amber ml-0.5"
+                  style={{ left: `${input.length}ch` }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>

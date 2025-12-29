@@ -77,7 +77,7 @@ export default {
   			},
   			'blink': {
           '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0' }
+          '50%': { opacity: '0.1' }
         },
         'crt-flicker': {
           '0%': { opacity: '0.99' },
@@ -94,10 +94,11 @@ export default {
         },
         'terminal-glitch': {
           '0%': { transform: 'translate(0)' },
-          '20%': { transform: 'translate(-2px, 2px)' },
-          '40%': { transform: 'translate(-2px, -2px)' },
-          '60%': { transform: 'translate(2px, 2px)' },
-          '80%': { transform: 'translate(2px, -2px)' },
+          '10%': { transform: 'translate(-3px, 1px)', filter: 'hue-rotate(90deg)' },
+          '20%': { transform: 'translate(3px, -1px)' },
+          '30%': { transform: 'translate(-3px, 0px)', filter: 'hue-rotate(0deg)' },
+          '40%': { transform: 'translate(1px, 2px)' },
+          '50%': { transform: 'translate(-1px, -2px)' },
           '100%': { transform: 'translate(0)' }
         },
         'typing': {
@@ -107,9 +108,9 @@ export default {
   		},
   		animation: {
   			'fade-in': 'fade-in 0.6s ease-out',
-  			'blink': 'blink 1.2s step-end infinite',
+  			'blink': 'blink 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'crt-flicker': 'crt-flicker 0.15s infinite',
-        'terminal-glitch': 'terminal-glitch 0.3s cubic-bezier(.25,.46,.45,.94) infinite',
+        'terminal-glitch': 'terminal-glitch 0.15s linear infinite',
         'typing': 'typing 2s steps(40, end)'
   		}
   	}

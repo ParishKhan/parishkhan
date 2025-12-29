@@ -58,27 +58,37 @@
 }
 @layer components {
   .terminal-scanline {
-    background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.15) 50%), linear-gradient(90deg, rgba(255,0,0,0.04), rgba(0,255,0,0.01), rgba(0,0,255,0.04));
-    background-size: 100% 3px, 3px 100%;
+    background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%), linear-gradient(90deg, rgba(255,0,0,0.02), rgba(0,255,0,0.01), rgba(0,0,255,0.02));
+    background-size: 100% 4px, 4px 100%;
     pointer-events: none;
     z-index: 1001;
   }
   .crt-overlay {
-    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.2) 100%);
-    box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.15) 100%);
+    box-shadow: inset 0 0 150px rgba(0,0,0,0.6);
     pointer-events: none;
     z-index: 1002;
   }
   .neon-glow-green {
-    text-shadow: 0 0 5px rgba(16, 185, 129, 0.5), 0 0 10px rgba(16, 185, 129, 0.2);
+    text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  }
+  .neon-glow-amber {
+    text-shadow: 0 0 10px rgba(251, 191, 47, 0.6);
+    filter: drop-shadow(0 0 4px rgba(251, 191, 47, 0.3));
+  }
+  .terminal-line {
+    @apply border-b border-emerald-900/10 py-0.5;
+  }
+  .backdrop-blur-xs {
+    backdrop-filter: blur(2px);
   }
   .custom-scrollbar::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-emerald-500/30 rounded-full hover:bg-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)];
+    @apply bg-emerald-500/20 rounded-full hover:bg-emerald-500/40;
   }
-  .terminal-input-prompt {
-    @apply text-sky-400 font-bold drop-shadow-[0_0_3px_rgba(59,130,246,0.5)];
-  }
+  .text-terminal-prompt { font-size: 1rem; }
+  .text-terminal-output { font-size: 0.875rem; }
+  .text-terminal-ascii { font-size: 0.75rem; line-height: 1; }
 }
