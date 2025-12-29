@@ -6,20 +6,6 @@ import { useTheme } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
 import { RichTerminalOutput } from './RichTerminalOutput';
 import { TerminalAutocomplete } from './TerminalAutocomplete';
-const playPing = () => {
-  try {
-    const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-    gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 0.05);
-  } catch (e) { /* Audio blocked */ }
-};
 export function ProgrammerTerminal() {
   const isTerminalMode = useTerminalStore((s) => s.isTerminalMode);
   const output = useTerminalStore((s) => s.output);
@@ -41,7 +27,26 @@ export function ProgrammerTerminal() {
   const [lastCommandError, setLastCommandError] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
   const sessionId = useRef(`SESSION_${Math.random().toString(36).substring(7).toUpperCase()}`);
+  const playPing = () => {
+    try {
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx.state === 'suspended') ctx.resume();
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+      gainNode.gain.setValueAtTime(0.02, ctx.currentTime);
+      oscillator.start();
+      oscillator.stop(ctx.currentTime + 0.05);
+    } catch (e) { /* Audio blocked */ }
+  };
   useEffect(() => {
     const timer = setInterval(() => {
       if (Date.now() - lastActivity > 45000) setIsIdle(true);
@@ -50,7 +55,9 @@ export function ProgrammerTerminal() {
     return () => clearInterval(timer);
   }, [lastActivity]);
   useEffect(() => {
-    if (isTerminalMode && inputRef.current) inputRef.current.focus();
+    if (isTerminalMode && inputRef.current) {
+      inputRef.current.focus();
+    }
   }, [isTerminalMode]);
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -71,7 +78,7 @@ export function ProgrammerTerminal() {
     addToHistory(cmd);
     setLastCommandError(false);
     addOutput({ content: trimmed, type: 'command' });
-    const parts = trimmed.split(' ');
+    const parts = trimmed.split(/\s+/);
     const baseCmd = parts[0].toLowerCase();
     const args = parts.slice(1);
     switch (baseCmd) {
@@ -79,29 +86,54 @@ export function ProgrammerTerminal() {
         addOutput([
           { content: 'AVAILABLE DIRECTIVES:', type: 'system' },
           { content: '  whoami, neofetch, skills, projects, experience, contact', type: 'response' },
-          { content: '  ls [skills|projects], cat [exp.log|resume.txt], ps', type: 'response' },
+          { content: '  ls, cat [file], echo [text], history, cd [dir]', type: 'response' },
           { content: '  matrix, cowsay [text], fortune, weather, theme, clear, exit', type: 'response' },
         ]);
-        setFollowUp('neofetch');
+        break;
+      case 'ls':
+        if (!args.length) {
+          addOutput({ content: 'drwxr-xr-x  projects/\ndrwxr-xr-x  skills/\n-rw-r--r--  exp.log\n-rw-r--r--  resume.txt', type: 'response' });
+        } else if (args[0] === 'skills') {
+          addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } });
+        } else if (args[0] === 'projects') {
+          addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'table' } });
+        } else {
+          addOutput({ content: `ls: ${args[0]}: No such file or directory`, type: 'error' });
+          setLastCommandError(true);
+        }
+        break;
+      case 'cd':
+        if (!args.length || args[0] === '~' || args[0] === '/') {
+          addOutput({ content: 'Moved to root directory: /home/parish', type: 'system' });
+        } else if (['projects', 'skills'].includes(args[0].replace('/', ''))) {
+          addOutput({ content: `Switched to directory: ${args[0]}`, type: 'system' });
+          addOutput({ content: `Hint: try 'ls' to view contents of ${args[0]}`, type: 'system' });
+        } else {
+          addOutput({ content: `cd: no such directory: ${args[0]}`, type: 'error' });
+          setLastCommandError(true);
+        }
+        break;
+      case 'echo':
+        addOutput({ content: args.join(' '), type: 'response' });
+        break;
+      case 'history':
+        addOutput(history.slice().reverse().map((h, i) => ({ content: ` ${i + 1}  ${h}`, type: 'response' })));
+        break;
+      case 'sudo':
+        addOutput({ content: 'Attempting to gain root privileges...', type: 'system' });
+        setTimeout(() => {
+          addOutput({ content: 'user is not in the sudoers file. This incident will be reported.', type: 'error' });
+          setLastCommandError(true);
+        }, 500);
         break;
       case 'whoami':
-        addOutput({ content: `${RESUME_DATA.formalName} — ${RESUME_DATA.summary}\nFull-stack engineer and UI enthusiast.`, type: 'response' });
+        addOutput({ content: `${RESUME_DATA.formalName}\n${RESUME_DATA.summary}`, type: 'response' });
         break;
       case 'neofetch':
         addOutput({ content: {}, type: 'rich', metadata: { richType: 'neofetch' } });
         break;
       case 'skills':
         addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } });
-        break;
-      case 'ls':
-        if (args[0]?.toLowerCase() === 'skills') {
-          addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } });
-        } else if (args[0]?.toLowerCase() === 'projects') {
-          addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'table' } });
-        } else {
-          addOutput({ content: 'usage: ls [skills|projects]', type: 'error' });
-          setLastCommandError(true);
-        }
         break;
       case 'projects':
       case 'ps':
@@ -111,12 +143,14 @@ export function ProgrammerTerminal() {
         addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } });
         break;
       case 'cat':
-        if (args[0] === 'exp.log') {
+        if (!args.length) {
+          addOutput({ content: 'usage: cat [filename]', type: 'system' });
+        } else if (args[0] === 'exp.log') {
           addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } });
         } else if (args[0] === 'resume.txt') {
           addOutput({ content: `${RESUME_DATA.summary}\n\n${RESUME_DATA.about}`, type: 'response' });
         } else {
-          addOutput({ content: 'file not found. try "ls" to see available files.', type: 'error' });
+          addOutput({ content: `cat: ${args[0]}: No such file or directory`, type: 'error' });
           setLastCommandError(true);
         }
         break;
@@ -130,13 +164,14 @@ export function ProgrammerTerminal() {
         const quotes = [
           "Code is like humor. When you have to explain it, it’s bad.",
           "Simplicity is the soul of efficiency.",
-          "Minimalism is not subtraction for the sake of subtraction."
+          "Minimalism is not subtraction for the sake of subtraction.",
+          "Talk is cheap. Show me the code."
         ];
         addOutput({ content: quotes[Math.floor(Math.random() * quotes.length)], type: 'response' });
         break;
       }
       case 'weather':
-        addOutput({ content: `LOCATION: ${RESUME_DATA.location}\nSTATUS: IDEAL_FOR_CODING\nTEMP: 22°C`, type: 'response' });
+        addOutput({ content: `LOCATION: ${RESUME_DATA.location}\nSTATUS: IDEAL_FOR_CODING\nTEMP: 24°C`, type: 'response' });
         break;
       case 'contact':
         addOutput(RESUME_DATA.contact.social.map(s => ({ content: `${s.name.padEnd(12)}: ${s.url}`, type: 'response' })));
@@ -154,8 +189,8 @@ export function ProgrammerTerminal() {
       default:
         setLastCommandError(true);
         addOutput([
-          { content: `zsh: command not found: ${parts[0]}`, type: 'error' },
-          { content: `Type 'help' for valid directives.`, type: 'system' }
+          { content: `zsh: command not found: ${baseCmd}`, type: 'error' },
+          { content: "Type 'help' for valid directives.", type: 'system' }
         ]);
     }
     setSuggestions([]);
@@ -205,7 +240,6 @@ export function ProgrammerTerminal() {
     >
       <div className="absolute inset-0 terminal-scanline pointer-events-none opacity-20" />
       <div className="absolute inset-0 crt-overlay pointer-events-none" />
-      {/* Terminal Header */}
       <div className="relative z-20 flex items-center justify-between px-4 py-2 bg-emerald-950/20 border-b border-emerald-900/30 text-[10px] uppercase tracking-widest text-emerald-600/60 font-bold">
         <div className="flex items-center gap-4">
           <span>PARISH_OS v2.2.0</span>
@@ -252,7 +286,6 @@ export function ProgrammerTerminal() {
             ))}
           </div>
         </div>
-        {/* Input Bar */}
         <div className="fixed bottom-0 left-0 right-0 bg-[#000A13]/90 backdrop-blur-md border-t border-emerald-900/30 p-4 md:p-6 z-30">
           <div className="max-w-5xl mx-auto relative">
             <TerminalAutocomplete onSelect={setInput} />
@@ -271,8 +304,7 @@ export function ProgrammerTerminal() {
                   spellCheck={false}
                   autoComplete="off"
                 />
-                {/* Custom Cursor */}
-                <div 
+                <div
                   className="absolute pointer-events-none w-[3px] h-[1.4em] bg-[#FBBF2F] animate-blink neon-glow-amber ml-0.5"
                   style={{ left: `${input.length}ch` }}
                 />
