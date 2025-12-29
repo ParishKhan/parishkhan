@@ -15,7 +15,7 @@ export function TerminalToggle() {
             onClick={toggleTerminal}
             variant="ghost"
             size="icon"
-            className="fixed top-6 right-20 hover:scale-110 transition-all duration-200 z-[100] bg-background/50 backdrop-blur-sm border border-border/50 rounded-full shadow-sm hover:text-amber-400 hover:border-amber-400/30"
+            className="fixed top-6 right-20 hover:scale-110 transition-all duration-200 z-[100] bg-background/50 backdrop-blur-sm border border-border/50 rounded-full shadow-sm hover:text-emerald-500 hover:border-emerald-500/30"
             aria-label="Enter Programmer Mode"
           >
             <Terminal className="h-5 w-5" />
