@@ -70,6 +70,8 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
     );
   }
   if (type === 'ps' || type === 'table') {
+    // Fix: Double cast to unknown then any[] to avoid TS2352 from readonly projects tuple
+    const projects = RESUME_DATA.projects as unknown as any[];
     return (
       <div className="py-2 overflow-x-auto custom-scrollbar">
         <div className="min-w-[600px]">
@@ -79,11 +81,11 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
             <div>COMMAND / PROJECT</div>
             <div>RUNTIME</div>
           </div>
-          {(RESUME_DATA.projects as any[]).map((p, i) => (
+          {projects.map((p, i) => (
             <div key={i} className="grid grid-cols-[1fr_0.8fr_3fr_1.5fr] gap-4 py-1.5 text-xs hover:bg-emerald-500/5 transition-colors">
-              <div className="text-emerald-600">PK_00{i+1}</div>
+              <div className="text-emerald-600">PK_00{i + 1}</div>
               <div className="text-emerald-400">RUNNING</div>
-              <div className="text-[#FBBF2F] font-bold truncate">{p.title} --v{i+1}.0</div>
+              <div className="text-[#FBBF2F] font-bold truncate">{p.title} --v{i + 1}.0</div>
               <div className="text-emerald-500/60 truncate">{p.techStack[0]} | production</div>
             </div>
           ))}

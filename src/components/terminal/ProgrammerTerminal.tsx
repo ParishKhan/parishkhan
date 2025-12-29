@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTerminalStore, TerminalLine } from '@/store/use-terminal-store';
 import { RESUME_DATA } from '@/data/resume-data';
@@ -67,7 +67,9 @@ export function ProgrammerTerminal() {
     playPing();
     updateActivity();
     addToHistory(cmd);
-    addOutput({ content: `parish@folio:~$ ${cmd}`, type: 'command' } as TerminalLine);
+    // Logic fix: Pass only the command string. 
+    // The renderer already adds 'parish@folio:~$ ' for type 'command'.
+    addOutput({ content: trimmed, type: 'command' } as TerminalLine);
     const parts = trimmed.split(' ');
     const baseCmd = parts[0].toLowerCase();
     const args = parts.slice(1);
@@ -92,9 +94,13 @@ export function ProgrammerTerminal() {
         setFollowUp('ls projects');
         break;
       case 'ls':
-        if (args[0]?.toLowerCase() === 'skills') addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } } as TerminalLine);
-        else if (args[0]?.toLowerCase() === 'projects') addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'table' } } as TerminalLine);
-        else addOutput({ content: 'usage: ls [skills|projects]', type: 'error' } as TerminalLine);
+        if (args[0]?.toLowerCase() === 'skills') {
+          addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } } as TerminalLine);
+        } else if (args[0]?.toLowerCase() === 'projects') {
+          addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'table' } } as TerminalLine);
+        } else {
+          addOutput({ content: 'usage: ls [skills|projects]', type: 'error' } as TerminalLine);
+        }
         break;
       case 'projects':
       case 'ps':
@@ -105,9 +111,13 @@ export function ProgrammerTerminal() {
         addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } } as TerminalLine);
         break;
       case 'cat':
-        if (args[0] === 'exp.log') addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } } as TerminalLine);
-        else if (args[0] === 'resume.txt') addOutput({ content: RESUME_DATA.summary + "\n\n" + RESUME_DATA.about, type: 'response' } as TerminalLine);
-        else addOutput({ content: 'file not found. try "ls" to see available files.', type: 'error' } as TerminalLine);
+        if (args[0] === 'exp.log') {
+          addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } } as TerminalLine);
+        } else if (args[0] === 'resume.txt') {
+          addOutput({ content: RESUME_DATA.summary + "\n\n" + RESUME_DATA.about, type: 'response' } as TerminalLine);
+        } else {
+          addOutput({ content: 'file not found. try "ls" to see available files.', type: 'error' } as TerminalLine);
+        }
         break;
       case 'matrix':
         addOutput({ content: {}, type: 'rich', metadata: { richType: 'matrix' } } as TerminalLine);
@@ -115,12 +125,19 @@ export function ProgrammerTerminal() {
       case 'cowsay':
         addOutput({ content: args.length > 0 ? args.join(' ') : 'Mooo!', type: 'rich', metadata: { richType: 'cowsay' } } as TerminalLine);
         break;
-      case 'fortune':
-        const quotes = ["Code is like humor. When you have to explain it, it’s bad.", "Simplicity is the soul of efficiency.", "Vibe coding is the future.", "Minimalism is not subtraction for the sake of subtraction."];
+      case 'fortune': {
+        // Fix: Wrapped in braces to resolve no-case-declarations ESLint error
+        const quotes = [
+          "Code is like humor. When you have to explain it, it’s bad.",
+          "Simplicity is the soul of efficiency.",
+          "Vibe coding is the future.",
+          "Minimalism is not subtraction for the sake of subtraction."
+        ];
         addOutput({ content: quotes[Math.floor(Math.random() * quotes.length)], type: 'response' } as TerminalLine);
         break;
+      }
       case 'weather':
-        addOutput({ content: `LOCATION: ${RESUME_DATA.location}\nSTATUS: VIBE_STORM_LEVEL_5\nTEMP: 22°C (IDEAL_FOR_CODING)`, type: 'response' } as TerminalLine);
+        addOutput({ content: `LOCATION: ${RESUME_DATA.location}\nSTATUS: VIBE_STORM_LEVEL_5\nTEMP: 22��C (IDEAL_FOR_CODING)`, type: 'response' } as TerminalLine);
         break;
       case 'sudo':
         addOutput({ content: 'nice try. user is not in the sudoers file. this incident will be reported.', type: 'error' } as TerminalLine);
@@ -194,11 +211,11 @@ export function ProgrammerTerminal() {
         <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar space-y-1 pb-4">
           <pre className="text-[8px] md:text-xs leading-none mb-8 text-[#FBBF2F] animate-pulse">
 {`
- ██████   █████  ██████  ██ ███████ ██   ██     ██   ██ ██   ██  █████  ███    ██ 
- ██   ██ ██   ██ ██   ██ ██ ██      ██   ██     ██  ██  ██   ██ ██   ██ ████   ██ 
- ██████  ███████ ██████  ██ ███████ ███████     █████   ███████ ███████ ██ ██  ██ 
- ██      ██   ██ ██   ██ ██      ██ ██   ██     ██  ██  ██   ██ ██   ██ ██  ██ ██ 
- ██      ██   ██ ██   ██ ██ ███████ ██   ██     ██   ██ ██   ██ ██   ██ ██   ████ 
+ ██████   █████  ██████  ██ ███████ ██   ██     ██   ██ ██   ██  █████  ███    ██
+ ██   ██ ██   ██ ██   ██ ██ ██      ██   ██     ██  ██  ██   ██ ██   ██ ████   ██
+ ██████  ███████ ██████  ██ ███████ ███████     █████   ███████ ███████ ██ ██  ██
+ ██      ██   ██ ██   ██ ██      ██ ██   ██     ██  ██  ██   ██ ██   ██ ██  ██ ██
+ ██      ██   ██ ██   ██ ██ ███████ ██   ██     ██   ██ ██   ██ ██   ██ ██   ████
  PORTFOLIO_OS v2.2-STABLE // BUILD: 2024.Q4
 `}
           </pre>
