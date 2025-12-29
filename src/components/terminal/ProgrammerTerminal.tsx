@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTerminalStore } from '@/store/use-terminal-store';
 import { RESUME_DATA } from '@/data/resume-data';
 import { useTheme } from '@/hooks/use-theme';
@@ -29,11 +29,12 @@ export function ProgrammerTerminal() {
     }
   }, [output]);
   const handleCommand = (cmd: string) => {
-    const trimmed = cmd.trim().toLowerCase();
+    const trimmed = cmd.trim();
     if (!trimmed) return;
+    const lowerCmd = trimmed.toLowerCase();
     addToHistory(cmd);
     addOutput({ content: `parish@folio:~$ ${cmd}`, type: 'command' });
-    const parts = trimmed.split(' ');
+    const parts = lowerCmd.split(' ');
     const baseCmd = parts[0];
     switch (baseCmd) {
       case 'help':
@@ -55,11 +56,11 @@ export function ProgrammerTerminal() {
         addOutput({ content: RESUME_DATA.summary, type: 'response' });
         break;
       case 'ls':
-        if (parts[1] === 'skills' || baseCmd === 'skills') {
+        if (parts[1] === 'skills') {
           Object.entries(RESUME_DATA.skills).forEach(([cat, items]) => {
             addOutput({ content: `[${cat.toUpperCase()}]: ${items.join(', ')}`, type: 'response' });
           });
-        } else if (parts[1] === 'projects' || baseCmd === 'projects') {
+        } else if (parts[1] === 'projects') {
           RESUME_DATA.projects.forEach(p => {
             addOutput({ content: `> ${p.title}: ${p.description} (${p.link.label})`, type: 'response' });
           });
@@ -68,13 +69,19 @@ export function ProgrammerTerminal() {
         }
         break;
       case 'skills':
-        handleCommand('ls skills');
-        return;
+        // Alias for ls skills without re-adding command line
+        Object.entries(RESUME_DATA.skills).forEach(([cat, items]) => {
+          addOutput({ content: `[${cat.toUpperCase()}]: ${items.join(', ')}`, type: 'response' });
+        });
+        break;
       case 'projects':
-        handleCommand('ls projects');
-        return;
+        // Alias for ls projects
+        RESUME_DATA.projects.forEach(p => {
+          addOutput({ content: `> ${p.title}: ${p.description} (${p.link.label})`, type: 'response' });
+        });
+        break;
       case 'cat':
-        if (parts[1] === 'exp.log' || baseCmd === 'experience') {
+        if (parts[1] === 'exp.log') {
           RESUME_DATA.work.forEach(w => {
             addOutput({ content: `[${w.start}-${w.end}] ${w.company} - ${w.title}`, type: 'response' });
             addOutput({ content: `  ${w.description}`, type: 'response' });
@@ -84,8 +91,12 @@ export function ProgrammerTerminal() {
         }
         break;
       case 'experience':
-        handleCommand('cat exp.log');
-        return;
+        // Alias for cat exp.log
+        RESUME_DATA.work.forEach(w => {
+          addOutput({ content: `[${w.start}-${w.end}] ${w.company} - ${w.title}`, type: 'response' });
+          addOutput({ content: `  ${w.description}`, type: 'response' });
+        });
+        break;
       case 'contact':
         addOutput([
           { content: `Email: ${RESUME_DATA.contact.email}`, type: 'response' },
@@ -138,7 +149,7 @@ export function ProgrammerTerminal() {
   };
   if (!isTerminalMode) return null;
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -149,7 +160,7 @@ export function ProgrammerTerminal() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-1 mb-4 scrollbar-terminal custom-scrollbar">
         <pre className="text-[10px] md:text-xs leading-none mb-6 text-emerald-600 opacity-80">
 {`
-  ____   _    ____  ___ ____  _   _ 
+  ____   _    ____  ___ ____  _   _
  |  _ \\ / \\  |  _ \\|_ _/ ___|| | | |
  | |_) / _ \\ | |_) || |\\___ \\| |_| |
  |  __/ ___ \\|  _ < | | ___) |  _  |

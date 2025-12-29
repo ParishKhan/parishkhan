@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { AnimatePresence } from 'framer-motion';
 import { HeroSection } from '@/components/hero-section';
@@ -15,16 +15,25 @@ import { useTerminalStore } from '@/store/use-terminal-store';
 export function HomePage() {
   const isTerminalMode = useTerminalStore((s) => s.isTerminalMode);
   const toggleTerminal = useTerminalStore((s) => s.toggleTerminal);
-  useHotkeys('~, `, ctrl+p', (e) => {
+  // Use array for hotkeys to avoid potential string parsing issues with special characters
+  useHotkeys(['~', '`', 'ctrl+p'], (e) => {
     e.preventDefault();
     toggleTerminal();
+  }, {
+    enableOnFormTags: true
   });
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-emerald-500/30 font-sans">
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {isTerminalMode && <ProgrammerTerminal />}
       </AnimatePresence>
-      <div aria-hidden={isTerminalMode} className={isTerminalMode ? "opacity-0 pointer-events-none" : "opacity-100"}>
+      <div 
+        aria-hidden={isTerminalMode} 
+        className={cn(
+          "transition-opacity duration-300",
+          isTerminalMode ? "opacity-0 pointer-events-none" : "opacity-100"
+        )}
+      >
         <ThemeToggle />
         <TerminalToggle />
         <Navigation />
@@ -70,4 +79,8 @@ export function HomePage() {
       <Toaster richColors position="bottom-right" />
     </div>
   );
+}
+// Utility function used above
+function cn(...inputs: any[]) {
+  return inputs.filter(Boolean).join(' ');
 }
