@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 export type TerminalLineType = 'command' | 'response' | 'error' | 'system' | 'rich';
 export interface TerminalLine {
-  content: any; // Can be string or rich data object
+  content: any;
   type: TerminalLineType;
   metadata?: {
     richType?: 'tree' | 'table' | 'neofetch' | 'changelog';
@@ -25,11 +25,16 @@ interface TerminalActions {
 }
 export const useTerminalStore = create<TerminalState & TerminalActions>((set) => ({
   isTerminalMode: false,
-  validCommands: ['about', 'skills', 'experience', 'projects', 'contact', 'theme', 'clear', 'exit', 'whoami', 'neofetch', 'help', 'ls', 'cat', 'cd', 'echo'],
+  validCommands: [
+    'about', 'skills', 'experience', 'projects', 'contact', 
+    'theme', 'clear', 'exit', 'whoami', 'neofetch', 
+    'help', 'ls', 'cat', 'cd', 'echo', 'history'
+  ],
   output: [
-    { content: "PARISH_OS [v2.0.4-LTS]", type: 'system', metadata: { animate: true } },
-    { content: "SYSTEM CHECK: OK", type: 'system' },
-    { content: "Type 'help' for available commands.", type: 'system' },
+    { content: "PARISH_OS [v2.1.0-STABLE]", type: 'system' },
+    { content: "SYSTEM_CHECK: 100% OK", type: 'system' },
+    { content: "INITIALIZING ENVIRONMENT...", type: 'system' },
+    { content: "Type 'help' to begin session.", type: 'system' },
     { content: "------------------------------------------------", type: 'system' },
   ],
   history: [],

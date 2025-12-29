@@ -23,21 +23,23 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
   }
   if (type === 'table') {
     return (
-      <div className="py-2 overflow-x-auto">
-        <div className="grid grid-cols-[1fr_2fr_1.5fr] gap-4 border-b border-emerald-900/50 pb-1 text-emerald-600 font-bold uppercase text-[10px]">
-          <div>Project</div>
-          <div>Description</div>
-          <div>Link</div>
-        </div>
-        {(data as any[]).map((p, i) => (
-          <div key={i} className="grid grid-cols-[1fr_2fr_1.5fr] gap-4 py-1 text-xs hover:bg-emerald-500/5">
-            <div className="text-sky-400 font-bold truncate">{p.title}</div>
-            <div className="text-emerald-500/70 truncate">{p.description}</div>
-            <a href={p.link.href} target="_blank" rel="noreferrer" className="text-emerald-500 underline decoration-emerald-500/30 hover:decoration-emerald-500 truncate">
-              {p.link.label}
-            </a>
+      <div className="py-2 overflow-x-auto custom-scrollbar">
+        <div className="min-w-[500px]">
+          <div className="grid grid-cols-[1.5fr_2fr_1.5fr] gap-4 border-b border-emerald-900/50 pb-1 text-emerald-600 font-bold uppercase text-[10px]">
+            <div>Project</div>
+            <div>Description</div>
+            <div>Link</div>
           </div>
-        ))}
+          {(data as any[]).map((p, i) => (
+            <div key={i} className="grid grid-cols-[1.5fr_2fr_1.5fr] gap-4 py-1.5 text-xs hover:bg-emerald-500/5 transition-colors">
+              <div className="text-sky-400 font-bold truncate">{p.title}</div>
+              <div className="text-emerald-500/70 truncate">{p.description}</div>
+              <a href={p.link.href} target="_blank" rel="noreferrer" className="text-emerald-500 underline decoration-emerald-500/30 hover:decoration-emerald-500 truncate">
+                {p.link.label}
+              </a>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -60,32 +62,32 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
   if (type === 'neofetch') {
     return (
       <div className="flex gap-8 py-4 items-start">
-        <div className="text-emerald-500/40 text-[8px] leading-[8px] font-bold hidden md:block">
+        <div className="text-emerald-500/60 text-[8px] leading-[8px] font-bold hidden md:block">
 {`
-      :::::::::   
-     :+:    :+:  
-    +:+    +:+   
-   +#++:++#+     
-  +#+            
- #+#             
-###              
+      :::::::::
+     :+:    :+:
+    +:+    +:+
+   +#++:++#+
+  +#+
+ #+#
+### ARISH
 `}
         </div>
         <div className="space-y-1">
           <div className="text-sky-400 font-bold">parish@folio</div>
           <div className="text-emerald-800">------------------</div>
-          <div className="text-xs"><span className="text-emerald-600 font-bold">OS:</span> Parish_Portfolio v2.0</div>
+          <div className="text-xs"><span className="text-emerald-600 font-bold">OS:</span> Parish_OS v2.1 (React_TS)</div>
           <div className="text-xs"><span className="text-emerald-600 font-bold">Host:</span> {RESUME_DATA.location}</div>
-          <div className="text-xs"><span className="text-emerald-600 font-bold">Kernel:</span> React 18.3.1</div>
-          <div className="text-xs"><span className="text-emerald-600 font-bold">Uptime:</span> {Math.floor(Date.now() / 1000000000)} mins</div>
-          <div className="text-xs"><span className="text-emerald-600 font-bold">Shell:</span> portfolio-sh</div>
-          <div className="text-xs"><span className="text-emerald-600 font-bold">UI:</span> TailwindCSS / Framer Motion</div>
-          <div className="flex gap-2 mt-2">
-            <div className="w-4 h-4 bg-emerald-900" />
-            <div className="w-4 h-4 bg-emerald-800" />
-            <div className="w-4 h-4 bg-emerald-700" />
-            <div className="w-4 h-4 bg-emerald-600" />
-            <div className="w-4 h-4 bg-emerald-500" />
+          <div className="text-xs"><span className="text-emerald-600 font-bold">Kernel:</span> 6.1.0-folio-generic</div>
+          <div className="text-xs"><span className="text-emerald-600 font-bold">Uptime:</span> {Math.floor(Date.now() / 6000000) % 60}h {Math.floor(Date.now() / 60000) % 60}m</div>
+          <div className="text-xs"><span className="text-emerald-600 font-bold">Shell:</span> zsh 5.8.1</div>
+          <div className="text-xs"><span className="text-emerald-600 font-bold">Theme:</span> {document.documentElement.classList.contains('dark') ? 'Dark' : 'Light'}</div>
+          <div className="flex gap-1.5 mt-2">
+            <div className="w-3 h-3 bg-emerald-900 rounded-sm" />
+            <div className="w-3 h-3 bg-emerald-700 rounded-sm" />
+            <div className="w-3 h-3 bg-emerald-500 rounded-sm" />
+            <div className="w-3 h-3 bg-sky-600 rounded-sm" />
+            <div className="w-3 h-3 bg-sky-400 rounded-sm" />
           </div>
         </div>
       </div>

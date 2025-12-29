@@ -12,10 +12,10 @@ import { Toaster } from '@/components/ui/sonner';
 import { ProgrammerTerminal } from '@/components/terminal/ProgrammerTerminal';
 import { TerminalToggle } from '@/components/terminal/TerminalToggle';
 import { useTerminalStore } from '@/store/use-terminal-store';
+import { cn } from '@/lib/utils';
 export function HomePage() {
   const isTerminalMode = useTerminalStore((s) => s.isTerminalMode);
   const toggleTerminal = useTerminalStore((s) => s.toggleTerminal);
-  // Use array for hotkeys to avoid potential string parsing issues with special characters
   useHotkeys(['~', '`', 'ctrl+p'], (e) => {
     e.preventDefault();
     toggleTerminal();
@@ -27,8 +27,8 @@ export function HomePage() {
       <AnimatePresence mode="wait">
         {isTerminalMode && <ProgrammerTerminal />}
       </AnimatePresence>
-      <div 
-        aria-hidden={isTerminalMode} 
+      <div
+        aria-hidden={isTerminalMode}
         className={cn(
           "transition-opacity duration-300",
           isTerminalMode ? "opacity-0 pointer-events-none" : "opacity-100"
@@ -79,8 +79,4 @@ export function HomePage() {
       <Toaster richColors position="bottom-right" />
     </div>
   );
-}
-// Utility function used above
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
 }

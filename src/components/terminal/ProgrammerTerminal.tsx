@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTerminalStore } from '@/store/use-terminal-store';
 import { RESUME_DATA } from '@/data/resume-data';
 import { useTheme } from '@/hooks/use-theme';
@@ -33,23 +33,22 @@ export function ProgrammerTerminal() {
   const handleCommand = (cmd: string) => {
     const trimmed = cmd.trim();
     if (!trimmed) return;
-    const lowerCmd = trimmed.toLowerCase();
     addToHistory(cmd);
     addOutput({ content: `parish@folio:~$ ${cmd}`, type: 'command' });
-    const parts = lowerCmd.split(' ');
-    const baseCmd = parts[0];
+    const parts = trimmed.split(' ');
+    const baseCmd = parts[0].toLowerCase();
     const args = parts.slice(1);
     switch (baseCmd) {
       case 'help':
         addOutput([
-          { content: 'SYSTEM COMMANDS:', type: 'system' },
+          { content: 'AVAILABLE COMMANDS:', type: 'system' },
           { content: '  whoami, neofetch, skills, projects, experience, contact', type: 'response' },
           { content: '  ls [skills|projects], cat [exp.log|resume.txt], cd [section]', type: 'response' },
-          { content: '  theme, clear, exit, help', type: 'response' },
+          { content: '  echo [text], history, theme, clear, exit', type: 'response' },
         ]);
         break;
       case 'whoami':
-        addOutput({ content: `${RESUME_DATA.formalName}: ${RESUME_DATA.about}`, type: 'response' });
+        addOutput({ content: `${RESUME_DATA.formalName} — ${RESUME_DATA.summary}`, type: 'response' });
         break;
       case 'neofetch':
         addOutput({ content: {}, type: 'rich', metadata: { richType: 'neofetch' } });
@@ -58,8 +57,8 @@ export function ProgrammerTerminal() {
         addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } });
         break;
       case 'ls':
-        if (args[0] === 'skills') addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } });
-        else if (args[0] === 'projects') addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'table' } });
+        if (args[0]?.toLowerCase() === 'skills') addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } });
+        else if (args[0]?.toLowerCase() === 'projects') addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'table' } });
         else addOutput({ content: 'usage: ls [skills|projects]', type: 'error' });
         break;
       case 'projects':
@@ -71,21 +70,29 @@ export function ProgrammerTerminal() {
       case 'cat':
         if (args[0] === 'exp.log') addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } });
         else if (args[0] === 'resume.txt') addOutput({ content: RESUME_DATA.summary + "\n\n" + RESUME_DATA.about, type: 'response' });
-        else addOutput({ content: 'file not found', type: 'error' });
+        else addOutput({ content: 'file not found. try "ls" to see available files.', type: 'error' });
         break;
       case 'cd':
         if (args[0]) {
-          const section = document.getElementById(args[0]);
+          const sectionId = args[0].replace('#', '').toLowerCase();
+          const section = document.getElementById(sectionId);
           if (section) {
             section.scrollIntoView({ behavior: 'smooth' });
-            addOutput({ content: `Navigating to #${args[0]}...`, type: 'system' });
+            addOutput({ content: `Navigating to #${sectionId}...`, type: 'system' });
+            setTimeout(() => toggleTerminal(), 500);
           } else {
             addOutput({ content: `directory not found: ${args[0]}`, type: 'error' });
           }
         }
         break;
+      case 'echo':
+        addOutput({ content: args.join(' '), type: 'response' });
+        break;
+      case 'history':
+        addOutput(history.map((h, i) => ({ content: ` ${history.length - i}  ${h}`, type: 'response' })).reverse());
+        break;
       case 'contact':
-        addOutput(RESUME_DATA.contact.social.map(s => ({ content: `${s.name}: ${s.url}`, type: 'response' })));
+        addOutput(RESUME_DATA.contact.social.map(s => ({ content: `${s.name.padEnd(10)}: ${s.url}`, type: 'response' })));
         break;
       case 'theme':
         toggleTheme();
@@ -98,7 +105,10 @@ export function ProgrammerTerminal() {
         toggleTerminal();
         break;
       default:
-        addOutput({ content: `zsh: command not found: ${baseCmd}`, type: 'error' });
+        addOutput([
+          { content: `zsh: command not found: ${parts[0]}`, type: 'error' },
+          { content: `Type 'help' to see list of valid commands.`, type: 'system' }
+        ]);
     }
   };
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -136,6 +146,7 @@ export function ProgrammerTerminal() {
       initial={{ opacity: 0, scale: 1.05 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
+      onClick={() => inputRef.current?.focus()}
       className="fixed inset-0 z-[1000] bg-[#000A13] text-emerald-400 font-mono flex flex-col p-4 md:p-8 overflow-hidden select-none"
     >
       <div className="absolute inset-0 terminal-scanline pointer-events-none opacity-20" />
@@ -144,12 +155,12 @@ export function ProgrammerTerminal() {
         <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar space-y-1 pb-4">
           <pre className="text-[10px] md:text-xs leading-none mb-8 text-emerald-500/80 animate-crt-flicker">
 {`
- ██████   █████  ██████  ██ ███████ ██   ██ 
- ██   ██ ██   ██ ██   ██ ██ ██      ██   ██ 
- ██████  ███████ ██████  ██ ███████ ███████ 
- ██      ██   ██ ██   ██ ██      ██ ██   ██ 
- ██      ██   ██ ██   ██ ██ ███████ ██   ██ 
- portfolio_os v2.0.4-LTS (built_with: react_ts)
+ ██████   █████  ██████  ██ ███████ ██   ██
+ ██   ██ ██   ██ ██   ██ ██ ██      ██   ██
+ ██████  ███████ ██████  ██ ███████ ███████
+ ██      ██   ██ ██   ██ ██      ██ ██   ██
+ ██      ██   ██ ██   ██ ██ ███████ ██   ██
+ portfolio_os v2.1.0-stable (built_with: react_ts)
 `}
           </pre>
           <div aria-live="polite" className="space-y-1">
@@ -162,9 +173,9 @@ export function ProgrammerTerminal() {
                 line.type === 'response' && "text-emerald-400"
               )}>
                 {line.type === 'rich' ? (
-                  <RichTerminalOutput 
-                    type={line.metadata?.richType} 
-                    data={line.content} 
+                  <RichTerminalOutput
+                    type={line.metadata?.richType}
+                    data={line.content}
                   />
                 ) : line.content}
               </div>
