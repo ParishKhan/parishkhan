@@ -70,6 +70,9 @@ export default {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
+  		shadows: {
+  			glass: '0 8px 32px rgba(0, 0, 0, 0.1)'
+  		},
   		keyframes: {
   			'fade-in': {
   				'0%': { opacity: '0', transform: 'translateY(10px)' },
