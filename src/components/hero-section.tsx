@@ -1,7 +1,8 @@
 import React from 'react';
 import { RESUME_DATA } from '@/data/resume-data';
 import { Button } from '@/components/ui/button';
-import { Mail, Phone } from 'lucide-react';
+import { Mail, Phone, MessageCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 export function HeroSection() {
   return (
     <section id="about" className="py-12 md:py-20 flex flex-col items-start gap-6 animate-fade-in scroll-mt-24">
@@ -17,7 +18,7 @@ export function HeroSection() {
             {RESUME_DATA.formalName}
           </h2>
         </div>
-        <div className="font-mono text-emerald-500 text-lg md:text-xl flex items-center">
+        <div className="font-mono text-emerald-500 text-lg md:text-xl flex flex-wrap items-center">
           <span className="border-r-2 border-emerald-500 pr-2 inline-block">
             {RESUME_DATA.summary}
           </span>
@@ -28,20 +29,28 @@ export function HeroSection() {
         </p>
       </div>
       <div className="flex flex-wrap gap-4 items-center">
-        {RESUME_DATA.contact.social.map((social) => (
-          <Button
-            key={social.name}
-            variant="outline"
-            size="icon"
-            asChild
-            className="rounded-xl hover:bg-emerald-500/10 hover:border-emerald-500/50 transition-colors"
-          >
-            <a href={social.url} target="_blank" rel="noopener noreferrer">
-              <social.icon className="h-4 w-4" />
-              <span className="sr-only">{social.name}</span>
-            </a>
-          </Button>
-        ))}
+        {RESUME_DATA.contact.social.map((social) => {
+          const isWhatsApp = social.name === "WhatsApp";
+          return (
+            <Button
+              key={social.name}
+              variant="outline"
+              size="icon"
+              asChild
+              className={cn(
+                "rounded-xl transition-all duration-300",
+                isWhatsApp 
+                  ? "hover:bg-green-500/20 border-green-500/50 hover:border-green-500 text-green-600 dark:text-green-400" 
+                  : "hover:bg-emerald-500/10 hover:border-emerald-500/50"
+              )}
+            >
+              <a href={social.url} target="_blank" rel="noopener noreferrer">
+                <social.icon className="h-4 w-4" />
+                <span className="sr-only">{social.name}</span>
+              </a>
+            </Button>
+          );
+        })}
         <Button
           variant="outline"
           size="icon"

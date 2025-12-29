@@ -1,4 +1,4 @@
-import { Github, Linkedin, Mail, Twitter, Facebook, Phone, ExternalLink } from "lucide-react";
+import { Github, Linkedin, Mail, Twitter, Facebook, MessageCircle, ExternalLink } from "lucide-react";
 export const RESUME_DATA = {
   name: "Parish Khan",
   formalName: "Mezbibur Rahman Khan",
@@ -8,7 +8,7 @@ export const RESUME_DATA = {
   about:
     "Software Engineer focused on building high-performance web applications with a minimalist aesthetic and clean code architecture.",
   summary:
-    "I am a results-driven Full Stack Engineer with a passion for frontend excellence and robust testing strategies. Currently scaling creative platforms at Artlist LTD.",
+    "I am a passionate Front-End Developer who enjoys solving complex problems with React and Next.js, currently working on creative platforms at Artlist LTD.",
   avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=200&h=200",
   contact: {
     email: "parish@artlist.io",
@@ -25,6 +25,11 @@ export const RESUME_DATA = {
         icon: Linkedin,
       },
       {
+        name: "WhatsApp",
+        url: "https://wa.me/+8801737094776",
+        icon: MessageCircle,
+      },
+      {
         name: "Facebook",
         url: "https://www.facebook.com/mezbibur/",
         icon: Facebook,
@@ -37,7 +42,7 @@ export const RESUME_DATA = {
     ],
   },
   skills: {
-    frontend: ["React", "TypeScript", "Next.js", "Tailwind CSS", "Angular", "NextUI", "Material UI", "Styled Components", "GraphQL"],
+    frontend: ["React", "TypeScript", "Next.js", "Tailwind CSS", "NextUI", "Styled Components", "GraphQL"],
     testing: ["Jest", "Storybook", "Unit Test", "Automation"],
     tools: ["Clean Code", "Git", "Accessibility", "JIRA", "TDD", "CI/CD"],
     ai: ["Prompt Engineering", "Vibe Coding", "LLMs", "AI Tools"],
@@ -74,6 +79,15 @@ export const RESUME_DATA = {
       link: {
         label: "artlist.io",
         href: "https://artlist.io",
+      },
+    },
+    {
+      title: "E-Bill",
+      techStack: ["React", "TypeScript", "NextJS", "NextUI"],
+      description: "Utility tool to calculate electricity bills. Published NPM library for algorithm; fully open-sourced on GitHub.",
+      link: {
+        label: "ebill.info.bd",
+        href: "https://ebill.info.bd",
       },
     },
     {
