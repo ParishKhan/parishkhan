@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTerminalStore } from '@/store/use-terminal-store';
 import { RESUME_DATA } from '@/data/resume-data';
 import { useTheme } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
+import { RichTerminalOutput } from './RichTerminalOutput';
 export function ProgrammerTerminal() {
   const isTerminalMode = useTerminalStore((s) => s.isTerminalMode);
   const output = useTerminalStore((s) => s.output);
   const history = useTerminalStore((s) => s.history);
   const historyIndex = useTerminalStore((s) => s.historyIndex);
+  const validCommands = useTerminalStore((s) => s.validCommands);
   const addOutput = useTerminalStore((s) => s.addOutput);
   const clearOutput = useTerminalStore((s) => s.clearOutput);
   const toggleTerminal = useTerminalStore((s) => s.toggleTerminal);
@@ -36,109 +38,90 @@ export function ProgrammerTerminal() {
     addOutput({ content: `parish@folio:~$ ${cmd}`, type: 'command' });
     const parts = lowerCmd.split(' ');
     const baseCmd = parts[0];
+    const args = parts.slice(1);
     switch (baseCmd) {
       case 'help':
-      case '?':
         addOutput([
-          { content: 'Available commands:', type: 'system' },
-          { content: '  about        - Show developer bio', type: 'response' },
-          { content: '  skills       - List technical toolkit (ls skills)', type: 'response' },
-          { content: '  experience   - Show professional history (cat exp.log)', type: 'response' },
-          { content: '  projects     - List active projects (ls projects)', type: 'response' },
-          { content: '  contact      - Show contact information', type: 'response' },
-          { content: '  theme        - Toggle light/dark mode', type: 'response' },
-          { content: '  clear        - Clear terminal screen', type: 'response' },
-          { content: '  exit         - Return to normal view', type: 'response' },
-          { content: '  echo [text]  - Print text to terminal', type: 'response' },
+          { content: 'SYSTEM COMMANDS:', type: 'system' },
+          { content: '  whoami, neofetch, skills, projects, experience, contact', type: 'response' },
+          { content: '  ls [skills|projects], cat [exp.log|resume.txt], cd [section]', type: 'response' },
+          { content: '  theme, clear, exit, help', type: 'response' },
         ]);
         break;
-      case 'about':
-        addOutput({ content: RESUME_DATA.summary, type: 'response' });
+      case 'whoami':
+        addOutput({ content: `${RESUME_DATA.formalName}: ${RESUME_DATA.about}`, type: 'response' });
         break;
-      case 'ls':
-        if (parts[1] === 'skills') {
-          Object.entries(RESUME_DATA.skills).forEach(([cat, items]) => {
-            addOutput({ content: `[${cat.toUpperCase()}]: ${items.join(', ')}`, type: 'response' });
-          });
-        } else if (parts[1] === 'projects') {
-          RESUME_DATA.projects.forEach(p => {
-            addOutput({ content: `> ${p.title}: ${p.description} (${p.link.label})`, type: 'response' });
-          });
-        } else {
-          addOutput({ content: 'Usage: ls [skills|projects]', type: 'error' });
-        }
+      case 'neofetch':
+        addOutput({ content: {}, type: 'rich', metadata: { richType: 'neofetch' } });
         break;
       case 'skills':
-        // Alias for ls skills without re-adding command line
-        Object.entries(RESUME_DATA.skills).forEach(([cat, items]) => {
-          addOutput({ content: `[${cat.toUpperCase()}]: ${items.join(', ')}`, type: 'response' });
-        });
+        addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } });
+        break;
+      case 'ls':
+        if (args[0] === 'skills') addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } });
+        else if (args[0] === 'projects') addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'table' } });
+        else addOutput({ content: 'usage: ls [skills|projects]', type: 'error' });
         break;
       case 'projects':
-        // Alias for ls projects
-        RESUME_DATA.projects.forEach(p => {
-          addOutput({ content: `> ${p.title}: ${p.description} (${p.link.label})`, type: 'response' });
-        });
-        break;
-      case 'cat':
-        if (parts[1] === 'exp.log') {
-          RESUME_DATA.work.forEach(w => {
-            addOutput({ content: `[${w.start}-${w.end}] ${w.company} - ${w.title}`, type: 'response' });
-            addOutput({ content: `  ${w.description}`, type: 'response' });
-          });
-        } else {
-          addOutput({ content: 'File not found. Try: cat exp.log', type: 'error' });
-        }
+        addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'table' } });
         break;
       case 'experience':
-        // Alias for cat exp.log
-        RESUME_DATA.work.forEach(w => {
-          addOutput({ content: `[${w.start}-${w.end}] ${w.company} - ${w.title}`, type: 'response' });
-          addOutput({ content: `  ${w.description}`, type: 'response' });
-        });
+        addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } });
+        break;
+      case 'cat':
+        if (args[0] === 'exp.log') addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } });
+        else if (args[0] === 'resume.txt') addOutput({ content: RESUME_DATA.summary + "\n\n" + RESUME_DATA.about, type: 'response' });
+        else addOutput({ content: 'file not found', type: 'error' });
+        break;
+      case 'cd':
+        if (args[0]) {
+          const section = document.getElementById(args[0]);
+          if (section) {
+            section.scrollIntoView({ behavior: 'smooth' });
+            addOutput({ content: `Navigating to #${args[0]}...`, type: 'system' });
+          } else {
+            addOutput({ content: `directory not found: ${args[0]}`, type: 'error' });
+          }
+        }
         break;
       case 'contact':
-        addOutput([
-          { content: `Email: ${RESUME_DATA.contact.email}`, type: 'response' },
-          { content: `Phone: ${RESUME_DATA.contact.phone}`, type: 'response' },
-          ...RESUME_DATA.contact.social.map(s => ({ content: `${s.name}: ${s.url}`, type: 'response' as const }))
-        ]);
+        addOutput(RESUME_DATA.contact.social.map(s => ({ content: `${s.name}: ${s.url}`, type: 'response' })));
         break;
       case 'theme':
         toggleTheme();
-        addOutput({ content: 'System theme toggled.', type: 'system' });
+        addOutput({ content: 'THEME_UPDATE: SUCCESS', type: 'system' });
         break;
       case 'clear':
         clearOutput();
         break;
       case 'exit':
-      case 'quit':
         toggleTerminal();
         break;
-      case 'echo':
-        addOutput({ content: parts.slice(1).join(' ') || '...', type: 'response' });
-        break;
       default:
-        addOutput({ content: `Command not found: ${baseCmd}. Type 'help' for assistance.`, type: 'error' });
+        addOutput({ content: `zsh: command not found: ${baseCmd}`, type: 'error' });
     }
   };
-  const onKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleCommand(input);
       setInput('');
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      const matches = validCommands.filter(c => c.startsWith(input.toLowerCase()));
+      if (matches.length === 1) setInput(matches[0]);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      const nextIndex = historyIndex + 1;
-      if (nextIndex < history.length) {
-        setHistoryIndex(nextIndex);
-        setInput(history[nextIndex]);
+      const nextIdx = historyIndex + 1;
+      if (nextIdx < history.length) {
+        setHistoryIndex(nextIdx);
+        setInput(history[nextIdx]);
       }
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
-      const nextIndex = historyIndex - 1;
-      if (nextIndex >= 0) {
-        setHistoryIndex(nextIndex);
-        setInput(history[nextIndex]);
+      const nextIdx = historyIndex - 1;
+      if (nextIdx >= 0) {
+        setHistoryIndex(nextIdx);
+        setInput(history[nextIdx]);
       } else {
         setHistoryIndex(-1);
         setInput('');
@@ -150,49 +133,58 @@ export function ProgrammerTerminal() {
   if (!isTerminalMode) return null;
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[1000] bg-[#09090b] text-emerald-500 font-mono p-4 md:p-8 flex flex-col overflow-hidden"
+      initial={{ opacity: 0, scale: 1.05 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="fixed inset-0 z-[1000] bg-[#000A13] text-emerald-400 font-mono flex flex-col p-4 md:p-8 overflow-hidden select-none"
     >
-      <div className="absolute inset-0 pointer-events-none scanline opacity-20" />
-      <div className="absolute inset-0 pointer-events-none terminal-glitch-bg opacity-5" />
-      <div ref={scrollRef} className="flex-1 overflow-y-auto space-y-1 mb-4 scrollbar-terminal custom-scrollbar">
-        <pre className="text-[10px] md:text-xs leading-none mb-6 text-emerald-600 opacity-80">
+      <div className="absolute inset-0 terminal-scanline pointer-events-none opacity-20" />
+      <div className="absolute inset-0 crt-overlay pointer-events-none" />
+      <div className="relative z-10 flex flex-col h-full max-w-5xl mx-auto w-full">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar space-y-1 pb-4">
+          <pre className="text-[10px] md:text-xs leading-none mb-8 text-emerald-500/80 animate-crt-flicker">
 {`
-  ____   _    ____  ___ ____  _   _
- |  _ \\ / \\  |  _ \\|_ _/ ___|| | | |
- | |_) / _ \\ | |_) || |\\___ \\| |_| |
- |  __/ ___ \\|  _ < | | ___) |  _  |
- |_| /_/   \\_\\_| \\_\\___|____/|_| |_|
-  PORTFOLIO_TERMINAL v1.1.0
+ ██████   █████  ██████  ██ ███████ ██   ██ 
+ ██   ██ ██   ██ ██   ██ ██ ██      ██   ██ 
+ ██████  ███████ ██████  ██ ███████ ███████ 
+ ██      ██   ██ ██   ██ ██      ██ ██   ██ 
+ ██      ██   ██ ██   ██ ██ ███████ ██   ██ 
+ portfolio_os v2.0.4-LTS (built_with: react_ts)
 `}
-        </pre>
-        {output.map((line, i) => (
-          <div key={i} className={cn(
-            "break-words leading-relaxed whitespace-pre-wrap",
-            line.type === 'command' && "text-sky-400",
-            line.type === 'error' && "text-red-400",
-            line.type === 'system' && "text-emerald-600 font-bold",
-            line.type === 'response' && "text-emerald-400"
-          )}>
-            {line.content}
+          </pre>
+          <div aria-live="polite" className="space-y-1">
+            {output.map((line, i) => (
+              <div key={i} className={cn(
+                "break-words whitespace-pre-wrap neon-glow-green",
+                line.type === 'command' && "terminal-input-prompt",
+                line.type === 'error' && "text-red-500 drop-shadow-none",
+                line.type === 'system' && "text-emerald-600 font-bold",
+                line.type === 'response' && "text-emerald-400"
+              )}>
+                {line.type === 'rich' ? (
+                  <RichTerminalOutput 
+                    type={line.metadata?.richType} 
+                    data={line.content} 
+                  />
+                ) : line.content}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="flex items-center gap-2 group">
-        <span className="text-sky-500 shrink-0">parish@folio:~$</span>
-        <input
-          ref={inputRef}
-          autoFocus
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={onKeyDown}
-          className="flex-1 bg-transparent border-none outline-none text-emerald-400 caret-emerald-500 selection:bg-emerald-500/30"
-          spellCheck={false}
-          autoComplete="off"
-        />
+        </div>
+        <div className="flex items-center gap-2 border-t border-emerald-900/30 pt-4 mt-auto">
+          <span className="terminal-input-prompt shrink-0">parish@folio:~$</span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-1 bg-transparent border-none outline-none text-emerald-400 caret-emerald-500"
+            spellCheck={false}
+            autoComplete="off"
+            autoFocus
+          />
+        </div>
       </div>
     </motion.div>
   );

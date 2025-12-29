@@ -1,14 +1,19 @@
 import { create } from 'zustand';
-export type TerminalLineType = 'command' | 'response' | 'error' | 'system';
+export type TerminalLineType = 'command' | 'response' | 'error' | 'system' | 'rich';
 export interface TerminalLine {
-  content: string;
+  content: any; // Can be string or rich data object
   type: TerminalLineType;
+  metadata?: {
+    richType?: 'tree' | 'table' | 'neofetch' | 'changelog';
+    animate?: boolean;
+  };
 }
 interface TerminalState {
   isTerminalMode: boolean;
   output: TerminalLine[];
   history: string[];
   historyIndex: number;
+  validCommands: string[];
 }
 interface TerminalActions {
   toggleTerminal: () => void;
@@ -20,20 +25,22 @@ interface TerminalActions {
 }
 export const useTerminalStore = create<TerminalState & TerminalActions>((set) => ({
   isTerminalMode: false,
+  validCommands: ['about', 'skills', 'experience', 'projects', 'contact', 'theme', 'clear', 'exit', 'whoami', 'neofetch', 'help', 'ls', 'cat', 'cd', 'echo'],
   output: [
-    { content: "PARISH_OS v1.1.0-stable (built on React/TS)", type: 'system' },
-    { content: "Welcome, user. Type 'help' to see available commands.", type: 'system' },
+    { content: "PARISH_OS [v2.0.4-LTS]", type: 'system', metadata: { animate: true } },
+    { content: "SYSTEM CHECK: OK", type: 'system' },
+    { content: "Type 'help' for available commands.", type: 'system' },
     { content: "------------------------------------------------", type: 'system' },
   ],
   history: [],
   historyIndex: -1,
   toggleTerminal: () => set((state) => ({ isTerminalMode: !state.isTerminalMode })),
   setTerminalMode: (mode) => set({ isTerminalMode: mode }),
-  addOutput: (lines) => set((state) => ({ 
-    output: [...state.output, ...(Array.isArray(lines) ? lines : [lines])] 
+  addOutput: (lines) => set((state) => ({
+    output: [...state.output, ...(Array.isArray(lines) ? lines : [lines])]
   })),
   clearOutput: () => set({ output: [] }),
-  addToHistory: (command) => set((state) => ({ 
+  addToHistory: (command) => set((state) => ({
     history: [command, ...state.history].slice(0, 50),
     historyIndex: -1
   })),
