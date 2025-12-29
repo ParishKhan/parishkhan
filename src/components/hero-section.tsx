@@ -1,7 +1,7 @@
 import React from 'react';
 import { RESUME_DATA } from '@/data/resume-data';
 import { Button } from '@/components/ui/button';
-import { Mail, Phone, MessageCircle } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 export function HeroSection() {
   return (
@@ -18,11 +18,11 @@ export function HeroSection() {
             {RESUME_DATA.formalName}
           </h2>
         </div>
-        <div className="font-mono text-emerald-500 text-lg md:text-xl flex flex-wrap items-center">
-          <span className="border-r-2 border-emerald-500 pr-2 inline-block">
+        <div className="font-mono text-emerald-500 text-lg md:text-xl flex flex-wrap items-baseline">
+          <span className="inline-flex items-center">
             {RESUME_DATA.summary}
+            <span className="inline-block w-[2px] h-[1.2em] bg-emerald-500 ml-1.5 animate-blink self-center" />
           </span>
-          <span className="w-2 h-6 bg-emerald-500 ml-1 animate-blink" />
         </div>
         <p className="text-muted-foreground max-w-[600px] text-base md:text-lg leading-relaxed">
           {RESUME_DATA.about}
@@ -39,8 +39,8 @@ export function HeroSection() {
               asChild
               className={cn(
                 "rounded-xl transition-all duration-300",
-                isWhatsApp 
-                  ? "hover:bg-green-500/20 border-green-500/50 hover:border-green-500 text-green-600 dark:text-green-400" 
+                isWhatsApp
+                  ? "hover:bg-green-500/20 border-green-500/50 hover:border-green-500 text-green-600 dark:text-green-400"
                   : "hover:bg-emerald-500/10 hover:border-emerald-500/50"
               )}
             >
