@@ -18,7 +18,7 @@ export function SkillsCloud() {
               <Badge
                 key={skill}
                 variant="secondary"
-                className="font-mono text-xs py-1 px-3 hover:bg-emerald-500 hover:text-white transition-all cursor-default border border-transparent hover:border-emerald-400"
+                className="font-mono text-xs py-1 px-3 hover:bg-emerald-500 hover:text-white transition-all cursor-default border border-transparent hover:border-emerald-400 shadow-sm"
               >
                 {skill}
               </Badge>
