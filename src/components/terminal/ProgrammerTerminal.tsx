@@ -6,13 +6,13 @@ import { useTheme } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
 import { RichTerminalOutput } from './RichTerminalOutput';
 import { TerminalAutocomplete } from './TerminalAutocomplete';
+import { TerminalLine, TerminalLineType } from '@/store/use-terminal-store';
 export function ProgrammerTerminal() {
   const isTerminalMode = useTerminalStore((s) => s.isTerminalMode);
   const output = useTerminalStore((s) => s.output);
   const history = useTerminalStore((s) => s.history);
   const historyIndex = useTerminalStore((s) => s.historyIndex);
   const validCommands = useTerminalStore((s) => s.validCommands);
-  const lastActivity = useTerminalStore((s) => s.lastActivity);
   const addOutput = useTerminalStore((s) => s.addOutput);
   const clearOutput = useTerminalStore((s) => s.clearOutput);
   const toggleTerminal = useTerminalStore((s) => s.toggleTerminal);
@@ -49,65 +49,89 @@ export function ProgrammerTerminal() {
     updateActivity();
     addToHistory(cmd);
     setLastCommandError(false);
-    addOutput({ content: trimmed, type: 'command' });
+    addOutput({ content: trimmed, type: 'command' as TerminalLineType });
     const parts = trimmed.split(/\s+/);
     const baseCmd = parts[0].toLowerCase();
     const args = parts.slice(1);
     switch (baseCmd) {
       case 'help':
         addOutput([
-          { content: 'AVAILABLE DIRECTIVES:', type: 'system' },
-          { content: '  whoami, neofetch, skills, projects, experience, contact', type: 'response' },
-          { content: '  ls, cat [file], echo [text], history, theme, clear, exit', type: 'response' },
+          { content: 'AVAILABLE DIRECTIVES:', type: 'system' as TerminalLineType },
+          { content: '  whoami, neofetch, skills, projects, experience, contact', type: 'response' as TerminalLineType },
+          { content: '  ls, cat [file], echo [text], history, matrix, cowsay, theme, clear, exit', type: 'response' as TerminalLineType },
         ]);
         break;
       case 'theme': {
         toggleTheme();
         const newTheme = !isDark ? 'dark' : 'light';
-        addOutput({ content: `Theme switched to ${newTheme}`, type: 'system' });
+        addOutput({ content: `Theme switched to ${newTheme}`, type: 'system' as TerminalLineType });
         break;
       }
       case 'contact': {
         if (args.includes('--call')) {
           window.open(`tel:${RESUME_DATA.contact.phone}`);
-          addOutput({ content: 'Initiating call request...', type: 'system' });
+          addOutput({ content: 'Initiating call request...', type: 'system' as TerminalLineType });
         } else if (args.includes('--mail')) {
           window.location.href = `mailto:${RESUME_DATA.contact.email}`;
-          addOutput({ content: 'Opening mail client...', type: 'system' });
+          addOutput({ content: 'Opening mail client...', type: 'system' as TerminalLineType });
         } else if (args.includes('--whatsapp')) {
           const waUrl = RESUME_DATA.contact.social.find(s => s.name === "WhatsApp")?.url;
           if (waUrl) window.open(waUrl);
-          addOutput({ content: 'Redirecting to WhatsApp...', type: 'system' });
+          addOutput({ content: 'Redirecting to WhatsApp...', type: 'system' as TerminalLineType });
         } else {
           addOutput([
-            { content: 'CONTACT CHANNELS:', type: 'system' },
-            ...RESUME_DATA.contact.social.map(s => ({ content: `${s.name.padEnd(12)}: ${s.url}`, type: 'response' })),
-            { content: `Phone: ${RESUME_DATA.contact.phone}`, type: 'response' },
-            { content: `Email: ${RESUME_DATA.contact.email}`, type: 'response' },
-            { content: 'Try: contact --call | --mail | --whatsapp', type: 'system' }
+            { content: 'CONTACT CHANNELS:', type: 'system' as TerminalLineType },
+            ...RESUME_DATA.contact.social.map(s => ({ content: `${s.name.padEnd(12)}: ${s.url}`, type: 'response' as TerminalLineType })),
+            { content: `Phone: ${RESUME_DATA.contact.phone}`, type: 'response' as TerminalLineType },
+            { content: `Email: ${RESUME_DATA.contact.email}`, type: 'response' as TerminalLineType },
+            { content: 'Try: contact --call | --mail | --whatsapp', type: 'system' as TerminalLineType }
           ]);
           setFollowUp('contact --mail');
         }
         break;
       }
       case 'whoami':
-        addOutput({ content: `${RESUME_DATA.formalName}\n${RESUME_DATA.summary}`, type: 'response' });
+        addOutput({ content: `${RESUME_DATA.formalName}\n${RESUME_DATA.summary}`, type: 'response' as TerminalLineType });
         break;
       case 'neofetch':
-        addOutput({ content: {}, type: 'rich', metadata: { richType: 'neofetch' } });
+        addOutput({ content: {}, type: 'rich' as TerminalLineType, metadata: { richType: 'neofetch' } });
         break;
       case 'skills':
-        addOutput({ content: RESUME_DATA.skills, type: 'rich', metadata: { richType: 'tree' } });
+        addOutput({ content: RESUME_DATA.skills, type: 'rich' as TerminalLineType, metadata: { richType: 'tree' } });
         break;
       case 'projects':
       case 'ps':
-        addOutput({ content: RESUME_DATA.projects, type: 'rich', metadata: { richType: 'ps' } });
+        addOutput({ content: RESUME_DATA.projects, type: 'rich' as TerminalLineType, metadata: { richType: 'ps' } });
         break;
       case 'experience':
-        addOutput({ content: RESUME_DATA.work, type: 'rich', metadata: { richType: 'changelog' } });
+        addOutput({ content: RESUME_DATA.work, type: 'rich' as TerminalLineType, metadata: { richType: 'changelog' } });
         break;
       case 'ls':
-        addOutput({ content: 'drwxr-xr-x projects/\ndrwxr-xr-x skills/\n-rw-r--r-- exp.log\n-rw-r--r-- resume.txt', type: 'response' });
+        addOutput({ content: 'drwxr-xr-x projects/\ndrwxr-xr-x skills/\n-rw-r--r-- exp.log\n-rw-r--r-- resume.txt', type: 'response' as TerminalLineType });
+        break;
+      case 'cat':
+        const file = args[0]?.toLowerCase();
+        if (file === 'resume.txt') {
+          addOutput({ content: `NAME: ${RESUME_DATA.formalName}\nSUMMARY: ${RESUME_DATA.about}`, type: 'response' as TerminalLineType });
+        } else if (file === 'exp.log') {
+          const log = RESUME_DATA.work.map(w => `${w.start}-${w.end}: ${w.company} - ${w.title}`).join('\n');
+          addOutput({ content: log, type: 'response' as TerminalLineType });
+        } else {
+          addOutput({ content: `cat: ${file || 'null'}: No such file or directory`, type: 'error' as TerminalLineType });
+        }
+        break;
+      case 'echo':
+        addOutput({ content: args.join(' ') || '\n', type: 'response' as TerminalLineType });
+        break;
+      case 'history':
+        const historyList = [...history].reverse().map((h, i) => `${i + 1}  ${h}`).join('\n');
+        addOutput({ content: historyList, type: 'response' as TerminalLineType });
+        break;
+      case 'matrix':
+        addOutput({ content: {}, type: 'rich' as TerminalLineType, metadata: { richType: 'matrix' } });
+        break;
+      case 'cowsay':
+        addOutput({ content: args.join(' ') || 'Moo!', type: 'rich' as TerminalLineType, metadata: { richType: 'cowsay' } });
         break;
       case 'clear':
         clearOutput();
@@ -117,7 +141,7 @@ export function ProgrammerTerminal() {
         break;
       default:
         setLastCommandError(true);
-        addOutput({ content: `zsh: command not found: ${baseCmd}`, type: 'error' });
+        addOutput({ content: `zsh: command not found: ${baseCmd}`, type: 'error' as TerminalLineType });
     }
     setSuggestions([]);
   };

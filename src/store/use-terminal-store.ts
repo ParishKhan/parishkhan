@@ -34,12 +34,12 @@ export const useTerminalStore = create<TerminalState & TerminalActions>((set) =>
   validCommands: [
     'about', 'skills', 'experience', 'projects', 'contact',
     'theme', 'clear', 'exit', 'whoami', 'neofetch',
-    'help', 'ls', 'cat', 'history', 'ps'
+    'help', 'ls', 'cat', 'history', 'ps', 'echo', 'matrix', 'cowsay'
   ],
   output: [
-    { content: "PARISH_OS [v2.2.0-LTS] LOADED", type: 'system' },
-    { content: "Try 'help' for commands or use suggestion chips below.", type: 'system' },
-    { content: "------------------------------------------------", type: 'system' },
+    { content: "PARISH_OS [v2.2.0-LTS] LOADED", type: 'system' as const },
+    { content: "Try 'help' for commands or use suggestion chips below.", type: 'system' as const },
+    { content: "------------------------------------------------", type: 'system' as const },
   ],
   history: [],
   historyIndex: -1,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { RESUME_DATA } from '@/data/resume-data';
 import { cn } from '@/lib/utils';
 interface RichOutputProps {
@@ -14,6 +14,57 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
       {children}
     </div>
   );
+  if (type === 'matrix') {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    useEffect(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      canvas.width = canvas.parentElement?.clientWidth || 800;
+      canvas.height = 300;
+      const columns = Math.floor(canvas.width / 20);
+      const drops: number[] = Array(columns).fill(1);
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%&*";
+      const draw = () => {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--terminal-text').trim();
+        ctx.font = '15px monospace';
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillText(text, i * 20, drops[i] * 20);
+          if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+          drops[i]++;
+        }
+      };
+      const interval = setInterval(draw, 50);
+      return () => clearInterval(interval);
+    }, []);
+    return (
+      <RichContainer className="p-0 overflow-hidden bg-black">
+        <canvas ref={canvasRef} className="block w-full h-[300px]" />
+      </RichContainer>
+    );
+  }
+  if (type === 'cowsay') {
+    const text = String(data);
+    const lineLen = text.length + 2;
+    const top = ` _${'_'.repeat(lineLen)}_`;
+    const bottom = ` -${'-'.repeat(lineLen)}-`;
+    const bubble = `${top}\n< ${text} >\n${bottom}`;
+    const cow = `
+        \\   ^__^
+         \\  (oo)\\_______
+            (__)\\       )\\/\\
+                ||----w |
+                ||     ||`;
+    return (
+      <RichContainer className="whitespace-pre font-mono text-xs md:text-sm">
+        {bubble}{cow}
+      </RichContainer>
+    );
+  }
   if (type === 'tree') {
     return (
       <RichContainer>
