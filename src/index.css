@@ -25,7 +25,7 @@
     --radius: 0.5rem;
     /* Terminal Light Mode */
     --terminal-bg: #f8f8f8;
-    --terminal-text: #006400;
+    --terminal-text: #22c55e;
     --terminal-prompt: #b8860b;
     --terminal-error: #cc0000;
     --terminal-border: rgba(0, 0, 0, 0.1);
@@ -52,8 +52,8 @@
     --input: 240 3.7% 15.9%;
     /* Terminal Dark Mode */
     --terminal-bg: #0a0a0a;
-    --terminal-text: #00ff41;
-    --terminal-prompt: #fbbf2f;
+    --terminal-text: #86efac;
+    --terminal-prompt: #eab308;
     --terminal-error: #ff4444;
     --terminal-border: rgba(255, 255, 255, 0.1);
   }
@@ -93,6 +93,6 @@
     width: 6px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-emerald-500/20 rounded-full hover:bg-emerald-500/40;
+    @apply bg-amber-400/20 rounded-full hover:bg-amber-400/40;
   }
 }

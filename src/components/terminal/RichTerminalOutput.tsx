@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { RESUME_DATA } from '@/data/resume-data';
 import { cn } from '@/lib/utils';
 interface RichOutputProps {
@@ -7,64 +7,67 @@ interface RichOutputProps {
 }
 export function RichTerminalOutput({ type, data }: RichOutputProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
   const dropsRef = useRef<number[]>([]);
+  const animationIdRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (type !== 'matrix' || !canvasRef.current) return;
+  useLayoutEffect(() => {
+    if (type !== 'matrix') return;
 
     let resizeObserver: ResizeObserver | null = null;
-    let interval: NodeJS.Timeout | null = null;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
     const updateCanvasSize = () => {
-      const canvas = canvasRef.current;
-      if (!canvas || !canvas.parentElement) return;
-      canvas.width = canvas.parentElement.clientWidth || 800;
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      canvas.width = parent.clientWidth || 800;
       canvas.height = 300;
       const columns = Math.floor(canvas.width / 20);
       dropsRef.current = Array(columns).fill(1);
     };
 
-    const ctx = canvasRef.current.getContext('2d');
-    if (!ctx) return;
-
     updateCanvasSize();
 
-    const parentEl = canvasRef.current.parentElement;
+    const parentEl = canvas.parentElement;
     if (parentEl) {
       resizeObserver = new ResizeObserver(updateCanvasSize);
       resizeObserver.observe(parentEl);
     }
 
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%&*";
-    const draw = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+    const tick = () => {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
+      
       ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--terminal-text').trim();
       ctx.font = '15px monospace';
+      
       const drops = dropsRef.current;
       for (let i = 0; i < drops.length; i++) {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%&*";
         const text = chars[Math.floor(Math.random() * chars.length)];
         ctx.fillText(text, i * 20, drops[i] * 20);
-        if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        
+        if (drops[i] * 20 > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
         drops[i]++;
       }
+      animationIdRef.current = requestAnimationFrame(tick);
     };
-    interval = setInterval(draw, 50);
+    animationIdRef.current = requestAnimationFrame(tick);
 
     return () => {
-      if (interval) clearInterval(interval);
+      if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
       if (resizeObserver) resizeObserver.disconnect();
     };
-  }, []);
+  }, [type]);
 
   const RichContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
-      "my-4 p-5 border border-[var(--terminal-border)] rounded-lg font-bold",
+      "my-4 p-3 md:p-4 border border-[var(--terminal-border)] rounded-lg font-bold",
       className
     )}>
       {children}
@@ -133,7 +136,7 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
               <div className="opacity-50">0x{(i + 1).toString(16).toUpperCase()}</div>
               <div className="text-[var(--terminal-prompt)]">ACTIVE</div>
               <div className="text-[var(--terminal-prompt)]">{p.title}</div>
-              <div className="truncate opacity-70 text-xs">{p.techStack[0]}</div>
+              <div className="truncate opacity-70 text-xs">{p.techStack?.[0] || 'N/A'}</div>
             </div>
           ))}
         </div>
@@ -168,16 +171,16 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
 +#++:++#+
 +#+
 #+#
-### ARISH
+### DEV
 `}
         </div>
         <div className="space-y-1 flex-1">
-          <div className="text-[var(--terminal-prompt)] text-xl border-b border-[var(--terminal-border)] pb-1 mb-2">parish@folio-v2</div>
-          <div className="text-sm grid grid-cols-[80px_1fr] gap-2">
-            <span className="opacity-50">OS:</span> Parish_OS
+          <div className="text-[var(--terminal-prompt)] text-xl border-b border-[var(--terminal-border)] pb-1 mb-2">dev@folio-v2</div>
+          <div className="text-sm grid grid-cols-[80px_1fr] gap-2 font-bold">
+            <span className="opacity-50">OS:</span> DEV_OS
             <span className="opacity-50">LOC:</span> {RESUME_DATA.location}
             <span className="opacity-50">SHELL:</span> zsh-vibe
-            <span className="opacity-50">STATUS:</span> {RESUME_DATA.work[0].title}
+            <span className="opacity-50">STATUS:</span> {RESUME_DATA.work?.[0]?.title || 'Developer'}
           </div>
           <div className="flex gap-2 mt-4">
             {[1, 2, 3, 4, 5].map(i => (

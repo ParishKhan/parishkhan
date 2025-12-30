@@ -185,7 +185,7 @@ export function ProgrammerTerminal() {
       exit={{ opacity: 0 }}
       onClick={() => inputRef.current?.focus()}
       className={cn(
-        "fixed inset-0 z-[1000] bg-[var(--terminal-bg)] text-[var(--terminal-text)] font-mono flex flex-col overflow-hidden font-bold text-base md:text-lg leading-tight",
+        "fixed inset-0 z-[1000] bg-[var(--terminal-bg)] text-[var(--terminal-text)] font-mono flex flex-col overflow-hidden font-bold text-sm leading-tight",
         lastCommandError && "animate-terminal-glitch"
       )}
     >
@@ -193,13 +193,13 @@ export function ProgrammerTerminal() {
       <div className="absolute inset-0 crt-overlay pointer-events-none" />
       <div className="relative z-20 flex items-center justify-between px-4 py-2 border-b border-[var(--terminal-border)] text-[10px] uppercase tracking-widest opacity-60">
         <div className="flex items-center gap-4">
-          <span>PARISH_OS v2.2.0</span>
+          <span>DEV_OS v2.2.0</span>
           <span>{sessionId.current}</span>
         </div>
         <div className="flex gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-red-500/40" />
           <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/40" />
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/40" />
+          <div className="w-2.5 h-2.5 rounded-full bg-amber-400/40" />
         </div>
       </div>
       <div className="relative z-10 flex flex-col h-full max-w-5xl mx-auto w-full px-4 md:px-8">
@@ -215,7 +215,7 @@ export function ProgrammerTerminal() {
                 <RichTerminalOutput type={line.metadata?.richType} data={line.content} />
               ) : (
                 <span>
-                  {line.type === 'command' && <span className="mr-2 opacity-50">parish@folio:~$</span>}
+                  {line.type === 'command' && <span className="mr-2 opacity-50 neon-glow-terminal">dev@folio:~$</span>}
                   {line.content}
                 </span>
               )}
@@ -226,8 +226,8 @@ export function ProgrammerTerminal() {
           <div className="max-w-5xl mx-auto relative">
             <TerminalAutocomplete onSelect={setInput} />
             <div className="flex items-center gap-3">
-              <span className="text-[var(--terminal-prompt)] shrink-0 select-none">
-                parish@folio:~$
+              <span className="text-[var(--terminal-prompt)] neon-glow-terminal shrink-0 select-none">
+                dev@folio:~$
               </span>
               <div className="relative flex-1 flex items-center">
                 <input

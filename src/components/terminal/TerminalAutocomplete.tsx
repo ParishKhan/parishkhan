@@ -30,14 +30,14 @@ export function TerminalAutocomplete({ onSelect }: TerminalAutocompleteProps) {
               key={cmd}
               onClick={() => onSelect(cmd)}
               className={cn(
-                "px-4 py-2 text-sm font-bold rounded-lg transition-all duration-200 border border-[var(--terminal-border)]",
-                "bg-[var(--terminal-prompt)] text-black shadow-lg hover:scale-105 active:scale-95"
+                "px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 border border-slate-600/60",
+                "bg-slate-900/60 text-slate-200 shadow-md hover:bg-slate-800/70 hover:shadow-lg hover:scale-105 active:scale-95"
               )}
             >
               {cmd}
             </button>
           ))}
-          <div className="flex items-center ml-auto px-2 text-[10px] opacity-40 uppercase tracking-tighter">
+          <div className="flex items-center ml-auto px-2 text-xs opacity-60 uppercase tracking-tighter">
             [TAB] AUTOCOMPLETE
           </div>
         </motion.div>
