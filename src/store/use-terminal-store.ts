@@ -34,13 +34,11 @@ export const useTerminalStore = create<TerminalState & TerminalActions>((set) =>
   validCommands: [
     'about', 'skills', 'experience', 'projects', 'contact',
     'theme', 'clear', 'exit', 'whoami', 'neofetch',
-    'help', 'ls', 'cat', 'cd', 'echo', 'history',
-    'matrix', 'cowsay', 'fortune', 'weather', 'ps', 'sudo'
+    'help', 'ls', 'cat', 'history', 'ps'
   ],
   output: [
-    { content: "PARISH_OS [v2.2.0-LTS]", type: 'system' },
-    { content: "SYSTEM_READY: ENCRYPTED_TUNNEL_ESTABLISHED", type: 'system' },
-    { content: "Type 'help' for available directives.", type: 'system' },
+    { content: "PARISH_OS [v2.2.0-LTS] LOADED", type: 'system' },
+    { content: "Try 'help' for commands or use suggestion chips below.", type: 'system' },
     { content: "------------------------------------------------", type: 'system' },
   ],
   history: [],
@@ -48,7 +46,7 @@ export const useTerminalStore = create<TerminalState & TerminalActions>((set) =>
   suggestions: [],
   suggestedFollowUp: null,
   lastActivity: Date.now(),
-  toggleTerminal: () => set((state) => ({ 
+  toggleTerminal: () => set((state) => ({
     isTerminalMode: !state.isTerminalMode,
     lastActivity: Date.now()
   })),
