@@ -33,7 +33,7 @@ export function HomePage() {
         className={cn(
           "transition-all duration-700 ease-in-out origin-center min-h-screen flex flex-col",
           isTerminalMode
-            ? "opacity-0 blur-2xl pointer-events-none scale-90 translate-y-10"
+            ? "opacity-0 blur-3xl pointer-events-none scale-95 translate-y-12"
             : "opacity-100 blur-0 scale-100 translate-y-0"
         )}
       >
@@ -88,7 +88,9 @@ export function HomePage() {
           </div>
         </main>
       </div>
-      <Toaster richColors position="bottom-right" />
+      <div className="relative z-[1001]">
+        <Toaster richColors position="bottom-right" />
+      </div>
     </div>
   );
 }

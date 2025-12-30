@@ -9,12 +9,12 @@ export function TerminalAutocomplete({ onSelect }: TerminalAutocompleteProps) {
   const suggestions = useTerminalStore((s) => s.suggestions);
   const followUp = useTerminalStore((s) => s.suggestedFollowUp);
   const isContactBase = suggestions.length === 1 && suggestions[0] === 'contact';
-  const chips = isContactBase 
+  const chips = isContactBase
     ? ['contact --mail', 'contact --call', 'contact --whatsapp']
-    : suggestions.length > 0 
-      ? suggestions 
-      : followUp 
-        ? [followUp] 
+    : suggestions.length > 0
+      ? suggestions
+      : followUp
+        ? [followUp]
         : [];
   return (
     <AnimatePresence>
@@ -30,16 +30,22 @@ export function TerminalAutocomplete({ onSelect }: TerminalAutocompleteProps) {
               key={cmd}
               onClick={() => onSelect(cmd)}
               className={cn(
-                "px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 border border-slate-600/60",
-                "bg-slate-900/60 text-slate-200 shadow-md hover:bg-slate-800/70 hover:shadow-lg hover:scale-105 active:scale-95"
+                "px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 border",
+                "bg-zinc-800 border-zinc-700 text-zinc-100 shadow-md",
+                "hover:bg-zinc-700 hover:border-emerald-500/50 hover:shadow-lg hover:scale-105 active:scale-95",
+                "dark:bg-zinc-900 dark:border-zinc-800 dark:text-emerald-400"
               )}
             >
               {cmd}
             </button>
           ))}
-          <div className="flex items-center ml-auto px-2 text-xs opacity-60 uppercase tracking-tighter">
+          <motion.div 
+            initial={{ opacity: 0, x: -5 }}
+            animate={{ opacity: 0.6, x: 0 }}
+            className="flex items-center ml-auto px-2 text-[10px] uppercase tracking-tighter font-mono"
+          >
             [TAB] AUTOCOMPLETE
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

@@ -1,5 +1,6 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { RESUME_DATA } from '@/data/resume-data';
+import { useTheme } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
 interface RichOutputProps {
   type?: 'tree' | 'table' | 'neofetch' | 'changelog' | 'matrix' | 'cowsay' | 'ps';
@@ -9,11 +10,16 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dropsRef = useRef<number[]>([]);
   const animationIdRef = useRef<number | null>(null);
+  const { isDark } = useTheme();
   useLayoutEffect(() => {
     if (type !== 'matrix') return;
     let resizeObserver: ResizeObserver | null = null;
     const canvas = canvasRef.current;
     if (!canvas) return;
+    // Cache the color lookup outside the animation loop
+    const terminalColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--terminal-text')
+      .trim() || '#22c55e';
     const updateCanvasSize = () => {
       const parent = canvas.parentElement;
       if (!parent) return;
@@ -33,7 +39,7 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
       if (!ctx) return;
       ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--terminal-text').trim();
+      ctx.fillStyle = terminalColor;
       ctx.font = '15px monospace';
       const drops = dropsRef.current;
       for (let i = 0; i < drops.length; i++) {
@@ -52,7 +58,7 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
       if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
       if (resizeObserver) resizeObserver.disconnect();
     };
-  }, [type]);
+  }, [type, isDark]);
   const RichContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
       "my-4 p-3 md:p-4 border border-[var(--terminal-border)] rounded-lg font-bold",

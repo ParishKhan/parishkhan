@@ -58,7 +58,7 @@ export function ProgrammerTerminal() {
         addOutput([
           { content: 'AVAILABLE DIRECTIVES:', type: 'system' as TerminalLineType },
           { content: '  whoami, neofetch, skills, projects, experience, contact', type: 'response' as TerminalLineType },
-          { content: '  ls, cat [file], echo [text], history, matrix, cowsay, theme, clear, exit', type: 'response' as TerminalLineType },
+          { content: '  ls, cd [dir], cat [file], echo [text], history, matrix, cowsay, theme, clear, exit', type: 'response' as TerminalLineType },
         ]);
         break;
       case 'theme': {
@@ -109,6 +109,16 @@ export function ProgrammerTerminal() {
       case 'ls':
         addOutput({ content: 'drwxr-xr-x projects/\ndrwxr-xr-x skills/\n-rw-r--r-- exp.log\n-rw-r--r-- resume.txt', type: 'response' as TerminalLineType });
         break;
+      case 'cd': {
+        const dir = args[0]?.toLowerCase().replace(/\/$/, '');
+        if (!dir) break;
+        if (['projects', 'skills'].includes(dir)) {
+          addOutput({ content: `cd: ${dir}: Access restricted. Use terminal-specific commands like 'projects' or 'skills' to view data.`, type: 'error' as TerminalLineType });
+        } else {
+          addOutput({ content: `cd: ${dir}: No such directory`, type: 'error' as TerminalLineType });
+        }
+        break;
+      }
       case 'cat': {
         const file = args[0]?.toLowerCase();
         if (file === 'resume.txt') {
@@ -116,6 +126,8 @@ export function ProgrammerTerminal() {
         } else if (file === 'exp.log') {
           const log = RESUME_DATA.work.map(w => `${w.start}-${w.end}: ${w.company} - ${w.title}`).join('\n');
           addOutput({ content: log, type: 'response' as TerminalLineType });
+        } else if (['projects', 'projects/', 'skills', 'skills/'].includes(file || '')) {
+          addOutput({ content: `cat: ${file}: Is a directory`, type: 'error' as TerminalLineType });
         } else {
           addOutput({ content: `cat: ${file || 'null'}: No such file or directory`, type: 'error' as TerminalLineType });
         }
@@ -143,7 +155,7 @@ export function ProgrammerTerminal() {
         break;
       default:
         setLastCommandError(true);
-        addOutput({ content: `zsh: command not found: ${baseCmd}`, type: 'error' as TerminalLineType });
+        addOutput({ content: `parish-sh: command not found: ${baseCmd}`, type: 'error' as TerminalLineType });
     }
     setSuggestions([]);
   };
@@ -236,7 +248,7 @@ export function ProgrammerTerminal() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="w-full bg-transparent border-none outline-none text-[var(--terminal-text)] caret-transparent"
+                  className="w-full bg-transparent border-none outline-none text-[var(--terminal-text)] caret-transparent font-mono"
                   spellCheck={false}
                   autoComplete="off"
                 />
