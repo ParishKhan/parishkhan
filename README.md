@@ -1,6 +1,6 @@
 # Parish Dev Folio
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ParishKhan/parishkhan)
 
 A modern, responsive developer portfolio website built with React, Tailwind CSS, and shadcn/ui. Fully powered by Cloudflare Workers for the backend API and optimized for performance with Vite bundling. Features a sleek sidebar navigation, theme toggle, and production-ready architecture.
 
@@ -96,7 +96,7 @@ For custom deployments:
 2. Run `bun build`
 3. Deploy: `npx wrangler deploy`
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ParishKhan/parishkhan)
 
 ## Project Structure
 
