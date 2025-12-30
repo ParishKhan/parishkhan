@@ -6,6 +6,62 @@ interface RichOutputProps {
   data: any;
 }
 export function RichTerminalOutput({ type, data }: RichOutputProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const dropsRef = useRef<number[]>([]);
+
+  useEffect(() => {
+    if (type !== 'matrix' || !canvasRef.current) return;
+
+    let resizeObserver: ResizeObserver | null = null;
+    let interval: NodeJS.Timeout | null = null;
+
+    const updateCanvasSize = () => {
+      const canvas = canvasRef.current;
+      if (!canvas || !canvas.parentElement) return;
+      canvas.width = canvas.parentElement.clientWidth || 800;
+      canvas.height = 300;
+      const columns = Math.floor(canvas.width / 20);
+      dropsRef.current = Array(columns).fill(1);
+    };
+
+    const ctx = canvasRef.current.getContext('2d');
+    if (!ctx) return;
+
+    updateCanvasSize();
+
+    const parentEl = canvasRef.current.parentElement;
+    if (parentEl) {
+      resizeObserver = new ResizeObserver(updateCanvasSize);
+      resizeObserver.observe(parentEl);
+    }
+
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%&*";
+    const draw = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--terminal-text').trim();
+      ctx.font = '15px monospace';
+      const drops = dropsRef.current;
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        ctx.fillText(text, i * 20, drops[i] * 20);
+        if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    };
+    interval = setInterval(draw, 50);
+
+    return () => {
+      if (interval) clearInterval(interval);
+      if (resizeObserver) resizeObserver.disconnect();
+    };
+  }, []);
+
   const RichContainer = ({ children, className }: { children: React.ReactNode, className?: string }) => (
     <div className={cn(
       "my-4 p-5 border border-[var(--terminal-border)] rounded-lg font-bold",
@@ -14,39 +70,15 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
       {children}
     </div>
   );
+
   if (type === 'matrix') {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    useEffect(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      canvas.width = canvas.parentElement?.clientWidth || 800;
-      canvas.height = 300;
-      const columns = Math.floor(canvas.width / 20);
-      const drops: number[] = Array(columns).fill(1);
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%&*";
-      const draw = () => {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--terminal-text').trim();
-        ctx.font = '15px monospace';
-        for (let i = 0; i < drops.length; i++) {
-          const text = chars[Math.floor(Math.random() * chars.length)];
-          ctx.fillText(text, i * 20, drops[i] * 20);
-          if (drops[i] * 20 > canvas.height && Math.random() > 0.975) drops[i] = 0;
-          drops[i]++;
-        }
-      };
-      const interval = setInterval(draw, 50);
-      return () => clearInterval(interval);
-    }, []);
     return (
       <RichContainer className="p-0 overflow-hidden bg-black">
         <canvas ref={canvasRef} className="block w-full h-[300px]" />
       </RichContainer>
     );
   }
+
   if (type === 'cowsay') {
     const text = String(data);
     const lineLen = text.length + 2;
@@ -99,7 +131,7 @@ export function RichTerminalOutput({ type, data }: RichOutputProps) {
           {projects.map((p, i) => (
             <div key={i} className="grid grid-cols-[80px_100px_1fr_120px] gap-4 px-5 py-3 text-sm border-b border-[var(--terminal-border)] last:border-0">
               <div className="opacity-50">0x{(i + 1).toString(16).toUpperCase()}</div>
-              <div className="text-emerald-500">ACTIVE</div>
+              <div className="text-[var(--terminal-prompt)]">ACTIVE</div>
               <div className="text-[var(--terminal-prompt)]">{p.title}</div>
               <div className="truncate opacity-70 text-xs">{p.techStack[0]}</div>
             </div>

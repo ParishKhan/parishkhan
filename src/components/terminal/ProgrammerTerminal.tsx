@@ -109,7 +109,7 @@ export function ProgrammerTerminal() {
       case 'ls':
         addOutput({ content: 'drwxr-xr-x projects/\ndrwxr-xr-x skills/\n-rw-r--r-- exp.log\n-rw-r--r-- resume.txt', type: 'response' as TerminalLineType });
         break;
-      case 'cat':
+      case 'cat': {
         const file = args[0]?.toLowerCase();
         if (file === 'resume.txt') {
           addOutput({ content: `NAME: ${RESUME_DATA.formalName}\nSUMMARY: ${RESUME_DATA.about}`, type: 'response' as TerminalLineType });
@@ -120,13 +120,15 @@ export function ProgrammerTerminal() {
           addOutput({ content: `cat: ${file || 'null'}: No such file or directory`, type: 'error' as TerminalLineType });
         }
         break;
+      }
       case 'echo':
         addOutput({ content: args.join(' ') || '\n', type: 'response' as TerminalLineType });
         break;
-      case 'history':
+      case 'history': {
         const historyList = [...history].reverse().map((h, i) => `${i + 1}  ${h}`).join('\n');
         addOutput({ content: historyList, type: 'response' as TerminalLineType });
         break;
+      }
       case 'matrix':
         addOutput({ content: {}, type: 'rich' as TerminalLineType, metadata: { richType: 'matrix' } });
         break;
