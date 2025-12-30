@@ -37,7 +37,8 @@ export const useTerminalStore = create<TerminalState & TerminalActions>((set) =>
     'help', 'ls', 'cat', 'history', 'ps', 'echo', 'matrix', 'cowsay'
   ],
   output: [
-    { content: "DEV_OS [v2.2.0-LTS] LOADED", type: 'system' as const },
+    { content: "PARISH_KHAN_OS [v2.2-LTS] LOADED", type: 'system' as const },
+    { content: "System identity verified. Initializing secure shell...", type: 'system' as const },
     { content: "Try 'help' for commands or use suggestion chips below.", type: 'system' as const },
     { content: "------------------------------------------------", type: 'system' as const },
   ],

@@ -6,7 +6,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
 import { RichTerminalOutput } from './RichTerminalOutput';
 import { TerminalAutocomplete } from './TerminalAutocomplete';
-import { TerminalLine, TerminalLineType } from '@/store/use-terminal-store';
+import { TerminalLineType } from '@/store/use-terminal-store';
 export function ProgrammerTerminal() {
   const isTerminalMode = useTerminalStore((s) => s.isTerminalMode);
   const output = useTerminalStore((s) => s.output);
@@ -191,10 +191,10 @@ export function ProgrammerTerminal() {
     >
       <div className="absolute inset-0 terminal-scanline pointer-events-none opacity-10" />
       <div className="absolute inset-0 crt-overlay pointer-events-none" />
-      <div className="relative z-20 flex items-center justify-between px-4 py-2 border-b border-[var(--terminal-border)] text-[10px] uppercase tracking-widest opacity-60">
+      <div className="relative z-20 flex items-center justify-between px-4 py-2 border-b border-[var(--terminal-border)] text-[10px] uppercase tracking-widest">
         <div className="flex items-center gap-4">
-          <span>DEV_OS v2.2.0</span>
-          <span>{sessionId.current}</span>
+          <span className="text-emerald-500 font-bold">Parish Khan OS v2.2</span>
+          <span className="opacity-60">{sessionId.current}</span>
         </div>
         <div className="flex gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-red-500/40" />
@@ -209,13 +209,13 @@ export function ProgrammerTerminal() {
               "terminal-line break-words whitespace-pre-wrap",
               line.type === 'command' ? "text-[var(--terminal-prompt)]" : "text-[var(--terminal-text)]",
               line.type === 'error' && "text-[var(--terminal-error)]",
-              line.type === 'system' && "opacity-70"
+              line.type === 'system' && "text-muted-foreground font-normal"
             )}>
               {line.type === 'rich' ? (
                 <RichTerminalOutput type={line.metadata?.richType} data={line.content} />
               ) : (
                 <span>
-                  {line.type === 'command' && <span className="mr-2 opacity-50 neon-glow-terminal">dev@folio:~$</span>}
+                  {line.type === 'command' && <span className="mr-2 opacity-50 neon-glow-terminal">parish@root:~$</span>}
                   {line.content}
                 </span>
               )}
@@ -227,7 +227,7 @@ export function ProgrammerTerminal() {
             <TerminalAutocomplete onSelect={setInput} />
             <div className="flex items-center gap-3">
               <span className="text-[var(--terminal-prompt)] neon-glow-terminal shrink-0 select-none">
-                dev@folio:~$
+                parish@root:~$
               </span>
               <div className="relative flex-1 flex items-center">
                 <input
